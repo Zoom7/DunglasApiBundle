@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\JsonLd;
 
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\JsonLd\Event\ContextBuilderEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -46,7 +46,7 @@ class ContextBuilder
     public function __construct(
         RouterInterface $router,
         EventDispatcherInterface $eventDispatcher,
-        ResourceCollectionInterface $resourceCollection
+        ResourceTypeRegistryInterface $resourceCollection
     ) {
         $this->router = $router;
         $this->eventDispatcher = $eventDispatcher;

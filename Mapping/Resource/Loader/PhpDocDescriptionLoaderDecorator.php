@@ -9,21 +9,19 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Loader;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader;
 
-use Dunglas\ApiBundle\Mapping\ClassMetadataInterface;
 use Dunglas\ApiBundle\Util\ReflectionTrait;
+use \phpDocumentor\Reflection\ClassReflector;
 use phpDocumentor\Reflection\FileReflector;
 use PropertyInfo\PropertyInfoInterface;
 
 /**
  * Extracts descriptions from PHPDoc.
  *
- * Attributes must be loaded first.
- *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class PhpDocLoader implements LoaderInterface
+class PhpDocDescriptionLoaderDecorator implements MetadataLoaderInterface
 {
     use ReflectionTrait;
 
@@ -35,40 +33,34 @@ class PhpDocLoader implements LoaderInterface
      * @var ClassReflector[]
      */
     private static $classReflectors = [];
-
     /**
-     * @var PropertyInfoInterface
+     * @var MetadataLoaderInterface
      */
-    private $propertyInfo;
+    private $loader;
 
-    public function __construct(PropertyInfoInterface $propertyInfo)
+    public function __construct(MetadataLoaderInterface $loader)
     {
-        $this->propertyInfo = $propertyInfo;
+        $this->loader = $loader;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function loadClassMetadata(
-        ClassMetadataInterface $classMetadata,
-        array $normalizationGroups = null,
-        array $denormalizationGroups = null,
-        array $validationGroups = null
-    ) {
-        if (
-            ($classReflector = $this->getClassReflector($classMetadata->getReflectionClass())) &&
-            $docBlock = $classReflector->getDocBlock()
-        ) {
-            $classMetadata = $classMetadata->withDescription($docBlock->getShortDescription());
+    public function getMetadata($name)
+    {
+        $metadata = $this->loader->getMetadata($name);
+
+        if (null === $metadata || null !== $metadata->getDescription()) {
+            return $metadata;
         }
 
-        foreach ($classMetadata->getAttributesMetadata() as $attributeName => $attributeMetadata) {
-            if ($reflectionProperty = $this->getReflectionProperty($classMetadata->getReflectionClass(), $attributeName)) {
-                $attributeMetadata = $attributeMetadata->withDescription(
-                    $this->propertyInfo->getShortDescription($reflectionProperty)
-                );
-                $classMetadata = $classMetadata->withAttributeMetadata($attributeName, $attributeMetadata);
-            }
+        $reflectionClass = new \ReflectionClass($name);
+
+        if (
+            ($classReflector = $this->getClassReflector($reflectionClass)) &&
+            $docBlock = $classReflector->getDocBlock()
+        ) {
+            $classMetadata = $metadata->withDescription($docBlock->getShortDescription());
         }
 
         return $classMetadata;
@@ -79,7 +71,7 @@ class PhpDocLoader implements LoaderInterface
      *
      * @param \ReflectionClass $reflectionClass
      *
-     * @return \phpDocumentor\Reflection\ClassReflector|null
+     * @return ClassReflector|null
      */
     private function getClassReflector(\ReflectionClass $reflectionClass)
     {

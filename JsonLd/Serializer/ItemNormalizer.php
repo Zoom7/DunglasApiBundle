@@ -12,7 +12,7 @@
 namespace Dunglas\ApiBundle\JsonLd\Serializer;
 
 use Dunglas\ApiBundle\Api\IriConverterInterface;
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Dunglas\ApiBundle\Exception\RuntimeException;
@@ -69,7 +69,7 @@ class ItemNormalizer extends AbstractNormalizer
     private $resourceResolver;
 
     public function __construct(
-        ResourceCollectionInterface $resourceCollection,
+        ResourceTypeRegistryInterface $resourceCollection,
         IriConverterInterface $iriConverter,
         ClassMetadataFactoryInterface $apiClassMetadataFactory,
         ContextBuilder $contextBuilder,

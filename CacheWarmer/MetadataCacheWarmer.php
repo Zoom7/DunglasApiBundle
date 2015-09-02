@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\CacheWarmer;
 
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
@@ -32,7 +32,7 @@ class MetadataCacheWarmer implements CacheWarmerInterface
     private $classMetadataFactory;
 
     public function __construct(
-        ResourceCollectionInterface $resourceCollection,
+        ResourceTypeRegistryInterface $resourceCollection,
         ClassMetadataFactoryInterface $classMetadataFactory
     ) {
         $this->resourceCollection = $resourceCollection;

@@ -33,7 +33,7 @@ class ResourceResolver
     /**
      * @param ResourceCollectionInterface $resourceCollection
      */
-    public function __construct(ResourceCollectionInterface $resourceCollection)
+    public function __construct(ResourceTypeRegistryInterface $resourceCollection)
     {
         $this->resourceCollection = $resourceCollection;
     }

@@ -80,4 +80,12 @@ class DoctrineIdentifierLoader implements LoaderInterface
 
         return $classMetadata;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAllClassMetadata()
+    {
+        return [];
+    }
 }

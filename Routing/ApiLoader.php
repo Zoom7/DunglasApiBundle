@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\Routing;
 
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -36,7 +36,7 @@ class ApiLoader extends Loader
      */
     private $fileLoader;
 
-    public function __construct(ResourceCollectionInterface $resourceCollection, KernelInterface $kernel)
+    public function __construct(ResourceTypeRegistryInterface $resourceCollection, KernelInterface $kernel)
     {
         $this->resourceCollection = $resourceCollection;
         $this->fileLoader = new XmlFileLoader(new FileLocator($kernel->locateResource('@DunglasApiBundle/Resources/config/routing')));

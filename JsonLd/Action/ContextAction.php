@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\JsonLd\Action;
 
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -40,7 +40,7 @@ class ContextAction
      */
     private $resourceTypeCollection;
 
-    public function __construct(ContextBuilder $contextBuilder, ResourceCollectionInterface $resourceTypeCollection)
+    public function __construct(ContextBuilder $contextBuilder, ResourceTypeRegistryInterface $resourceTypeCollection)
     {
         $this->contextBuilder = $contextBuilder;
         $this->resourceTypeCollection = $resourceTypeCollection;

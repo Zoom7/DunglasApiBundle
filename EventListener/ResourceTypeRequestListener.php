@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\EventListener;
 
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
@@ -27,7 +27,7 @@ class ResourceTypeRequestListener
      */
     private $resourceTypeCollection;
 
-    public function __construct(ResourceCollectionInterface $resourceTypeCollection)
+    public function __construct(ResourceTypeRegistryInterface $resourceTypeCollection)
     {
         $this->resourceTypeCollection = $resourceTypeCollection;
     }

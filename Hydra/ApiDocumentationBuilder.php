@@ -12,7 +12,7 @@
 namespace Dunglas\ApiBundle\Hydra;
 
 use Dunglas\ApiBundle\Api\Operation\OperationInterface;
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
 use Dunglas\ApiBundle\Mapping\AttributeMetadataInterface;
@@ -55,7 +55,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
      * @param string                        $description
      */
     public function __construct(
-        ResourceCollectionInterface $resourceCollection,
+        ResourceTypeRegistryInterface $resourceCollection,
         ContextBuilder $contextBuilder,
         RouterInterface $router,
         ClassMetadataFactoryInterface $classMetadataFactory,

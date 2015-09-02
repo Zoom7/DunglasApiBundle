@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class SerializerMetadataLoader implements LoaderInterface
+class SerializerMetadataLoader implements LoaderInterface, ClassMetadataFactoryAwareInterface
 {
     /**
      * @var AttributeMetadataFactoryInterface
@@ -37,6 +37,14 @@ class SerializerMetadataLoader implements LoaderInterface
     {
         $this->attributeMetadataFactory = $attributeMetadataFactory;
         $this->serializerClassMetadataFactory = $serializerClassMetadataFactory;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setClassMetadataFactory(ClassMetadataFactoryInterface $classMetadataFactory)
+    {
+        $this->attributeMetadataFactory->setClassMetadataFactory($classMetadataFactory);
     }
 
     /**
@@ -105,6 +113,14 @@ class SerializerMetadataLoader implements LoaderInterface
         }
 
         return [$classMetadata, $attributeMetadata];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAllClassMetadata()
+    {
+        return [];
     }
 
     /**

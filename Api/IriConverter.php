@@ -51,7 +51,7 @@ class IriConverter implements IriConverterInterface
     private $classMetadataFactory;
 
     public function __construct(
-        ResourceCollectionInterface $resourceCollection,
+        ResourceTypeRegistryInterface $resourceCollection,
         DataProviderInterface $dataProvider,
         ClassMetadataFactoryInterface $classMetadataFactory,
         RouterInterface $router,

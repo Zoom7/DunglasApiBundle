@@ -12,14 +12,25 @@
 namespace Dunglas\ApiBundle\Annotation;
 
 /**
- * Iri annotation.
+ * Pagination annotation.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  *
  * @Annotation
- * @Target({"CLASS","PROPERTY"})
+ * @Target({"ANNOTATION"})
  */
-class Iri
+class Pagination
 {
-    public $value;
+    /**
+     * @var bool
+     */
+    public $enabled = true;
+    /**
+     * @var float
+     */
+    public $itemsPerPage = 30.;
+    /**
+     * @var bool
+     */
+    public $clientControlEnabled = false;
 }

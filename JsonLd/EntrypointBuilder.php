@@ -15,6 +15,7 @@ use Dunglas\ApiBundle\Api\IriConverterInterface;
 use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
+use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -38,7 +39,7 @@ class EntrypointBuilder
     private $router;
 
     public function __construct(
-        ResourceCollectionInterface $resourceCollection,
+        ResourceTypeRegistryInterface $resourceCollection,
         IriConverterInterface $iriConverter,
         RouterInterface $router
     ) {
