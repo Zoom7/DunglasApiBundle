@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Driver\Annotation\Resource;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Annotation;
 
 use Doctrine\Common\Annotations\Reader;
 use Dunglas\ApiBundle\Annotation\Resource;

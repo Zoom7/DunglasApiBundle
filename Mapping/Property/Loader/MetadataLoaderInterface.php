@@ -25,8 +25,9 @@ interface MetadataLoaderInterface
      *
      * @param string $resourceClass
      * @param string $name
+     * @param array $options
      *
-     * @return Metadata
+     * @return Metadata|null
      */
-    public function getMetadata($resourceClass, $name);
+    public function getMetadata($resourceClass, $name, array $options);
 }

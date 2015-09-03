@@ -26,7 +26,7 @@ interface CollectionLoaderInterface
      * @param string $resourceClass
      * @param array  $options
      *
-     * @return Collection
+     * @return Collection|null
      */
     public function getCollection($resourceClass, array $options);
 }

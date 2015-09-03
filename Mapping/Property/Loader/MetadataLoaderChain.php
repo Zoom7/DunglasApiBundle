@@ -11,23 +11,20 @@
 
 namespace Dunglas\ApiBundle\Mapping\Property\Loader;
 
-use Dunglas\ApiBundle\Mapping\Property\Collection;
-use Dunglas\ApiBundle\Mapping\Property\ResourcePropertyCollectionLoaderInterface;
-
 /**
- * Retrieves the list of attributes for a given resource class and a set of options.
+ * Chain loader.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ResourcePropertyCollectionChainLoader implements CollectionLoaderInterface
+class MetadataLoaderChain implements MetadataLoaderInterface
 {
     /**
-     * @var CollectionLoaderInterface[]
+     * @var MetadataLoaderInterface[]
      */
     private $loaders;
 
     /**
-     * @param CollectionLoaderInterface[] $loaders
+     * @param MetadataLoaderInterface[] $loaders
      */
     public function __construct(array $loaders)
     {
@@ -37,13 +34,13 @@ class ResourcePropertyCollectionChainLoader implements CollectionLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function getCollection($resourceClass, array $options)
+    public function getMetadata($resourceClass, $name, array $options)
     {
         foreach ($this->loaders as $loader) {
-            $collection = $loader->getCollection($resourceClass, $options);
+            $metadata = $loader->getMetadata($resourceClass, $name, $options);
 
-            if (null !== $collection) {
-                return $collection;
+            if (null !== $metadata) {
+                return $metadata;
             }
         }
     }

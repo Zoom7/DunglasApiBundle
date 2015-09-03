@@ -22,27 +22,31 @@ namespace Dunglas\ApiBundle\Annotation;
 class Property
 {
     /**
-     * @var string
+     * @var string|null
+     */
+    public $description;
+    /**
+     * @var bool|null
+     */
+    public $readable;
+    /**
+     * @var bool|null
+     */
+    public $writable;
+    /**
+     * @var bool|null
+     */
+    public $readableLink;
+    /**
+     * @var bool|null
+     */
+    public $writableLink;
+    /**
+     * @var bool|null
+     */
+    public $required;
+    /**
+     * @var string|null
      */
     public $iri;
-    /**
-     * @var string
-     */
-    public $description = '';
-    /**
-     * @var bool
-     */
-    public $readable = true;
-    /**
-     * @var bool
-     */
-    public $writable = true;
-    /**
-     * @var bool
-     */
-    public $readableLink = true;
-    /**
-     * @var bool
-     */
-    public $writableLink = true;
 }

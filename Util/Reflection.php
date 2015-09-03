@@ -12,12 +12,31 @@
 namespace Dunglas\ApiBundle\Util;
 
 /**
- * Reflection utils.
+ * Reflection utilities.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-trait ReflectionTrait
+class Reflection
 {
+    const ACCESSOR_PREFIXES = ['get', 'is', 'has', 'can'];
+    const MUTATOR_PREFIXES = ['set', 'add', 'remove'];
+
+    /**
+     * Gets the property name associated with an accessor method.
+     *
+     * @param string $methodName
+     *
+     * @return string|null
+     */
+    public function getProperty($methodName)
+    {
+        $pattern = join('|', array_merge(self::ACCESSOR_PREFIXES, self::MUTATOR_PREFIXES));
+
+        if (preg_match('/^('.$pattern.')(.+)$/i', $methodName, $matches)) {
+            return $matches[2];
+        }
+    }
+
     /**
      * Gets the {@see \ReflectionProperty} from the class or its parent.
      *

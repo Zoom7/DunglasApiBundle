@@ -21,10 +21,8 @@ use PropertyInfo\PropertyInfoInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class PhpDocDescriptionLoaderDecorator implements MetadataLoaderInterface
+class MetadataPhpDocDescriptionLoaderDecorator implements MetadataLoaderInterface
 {
-    use ReflectionTrait;
-
     /**
      * @var FileReflector[]
      */

@@ -16,7 +16,7 @@ namespace Dunglas\ApiBundle\Mapping\Resource\Loader;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ShortNameGuesserLoaderDecorator implements MetadataLoaderInterface
+class MetadataShortNameGuesserLoaderDecorator implements MetadataLoaderInterface
 {
     /**
      * @var MetadataLoaderInterface

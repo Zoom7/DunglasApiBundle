@@ -21,31 +21,31 @@ use PropertyInfo\Type;
 class Metadata
 {
     /**
-     * @var Type
+     * @var Type|null
      */
     private $type;
     /**
-     * @var string
+     * @var string|null
      */
     private $description;
     /**
-     * @var bool
+     * @var bool|null
      */
     private $readable;
     /**
-     * @var bool
+     * @var bool|null
      */
     private $writable;
     /**
-     * @var bool
+     * @var bool|null
      */
     private $readableLink;
     /**
-     * @var bool
+     * @var bool|null
      */
     private $writableLink;
     /**
-     * @var bool
+     * @var bool|null
      */
     private $required;
     /**
@@ -54,16 +54,16 @@ class Metadata
     private $iri;
 
     /**
-     * @param Type   $type
-     * @param string $description
-     * @param bool   $readable
-     * @param bool   $writable
-     * @param bool   $readableLink
-     * @param bool   $writableLink
-     * @param bool   $required
-     * @param string $iri
+     * @param Type|null   $type
+     * @param string|null $description
+     * @param bool|null   $readable
+     * @param bool|null   $writable
+     * @param bool|null   $readableLink
+     * @param bool|null   $writableLink
+     * @param bool|null   $required
+     * @param string|null $iri
      */
-    public function __construct(Type $type, $description, $readable, $writable, $readableLink, $writableLink, $required, $iri)
+    public function __construct(Type $type = null, $description, $readable, $writable, $readableLink, $writableLink, $required, $iri)
     {
         $this->type = $type;
         $this->description = $description;
@@ -78,7 +78,7 @@ class Metadata
     /**
      * Gets type.
      *
-     * @return Type
+     * @return Type|null
      */
     public function getType()
     {
@@ -86,9 +86,24 @@ class Metadata
     }
 
     /**
+     * Returns a new instance of Metadata with the given type.
+     *
+     * @param Type $type
+     *
+     * @return self
+     */
+    public function withType(Type $type)
+    {
+        $metadata = clone $this;
+        $metadata->type = $type;
+
+        return $metadata;
+    }
+
+    /**
      * Gets description.
      *
-     * @return string
+     * @return string|null
      */
     public function getDescription()
     {
@@ -96,9 +111,24 @@ class Metadata
     }
 
     /**
+     * Returns a new instance of Metadata with the given description.
+     *
+     * @param string $description
+     *
+     * @return self
+     */
+    public function withDescription($description)
+    {
+        $metadata = clone $this;
+        $metadata->description = $description;
+
+        return $metadata;
+    }
+
+    /**
      * Is readable?
      *
-     * @return bool
+     * @return bool|null
      */
     public function isReadable()
     {
@@ -106,9 +136,24 @@ class Metadata
     }
 
     /**
+     * Returns a new instance of Metadata with the given readable flag.
+     *
+     * @param bool $readable
+     *
+     * @return self
+     */
+    public function withReadable($readable)
+    {
+        $metadata = clone $this;
+        $metadata->readable = $readable;
+
+        return $metadata;
+    }
+
+    /**
      * Is writable?
      *
-     * @return bool
+     * @return bool|null
      */
     public function isWritable()
     {
@@ -116,9 +161,24 @@ class Metadata
     }
 
     /**
+     * Returns a new instance of Metadata with the given writable flag.
+     *
+     * @param bool $writable
+     *
+     * @return self
+     */
+    public function withWritable($writable)
+    {
+        $metadata = clone $this;
+        $metadata->writable = $writable;
+
+        return $metadata;
+    }
+
+    /**
      * Is required?
      *
-     * @return bool
+     * @return bool|null
      */
     public function isRequired()
     {
@@ -126,19 +186,24 @@ class Metadata
     }
 
     /**
-     * Is this attribute a relation to a resource?
+     * Returns a new instance of Metadata with the given required flag.
      *
-     * @return bool
+     * @param bool $required
+     *
+     * @return self
      */
-    public function isLink()
+    public function withRequired($required)
     {
-        return $this->link;
+        $metadata = clone $this;
+        $metadata->required = $required;
+
+        return $metadata;
     }
 
     /**
      * Should an IRI or an object be provided in write context?
      *
-     * @return bool
+     * @return bool|null
      */
     public function isWritableLink()
     {
@@ -146,13 +211,43 @@ class Metadata
     }
 
     /**
+     * Returns a new instance of Metadata with the given writable link flag.
+     *
+     * @param bool $writableLink
+     *
+     * @return self
+     */
+    public function withWritableLink($writableLink)
+    {
+        $metadata = clone $this;
+        $metadata->writableLink = $writableLink;
+
+        return $metadata;
+    }
+
+    /**
      * Is an IRI or an object generated in read context?
      *
-     * @return bool
+     * @return bool|null
      */
     public function isReadableLink()
     {
         return $this->readableLink;
+    }
+
+    /**
+     * Returns a new instance of Metadata with the given readable link flag.
+     *
+     * @param bool $readableLink
+     *
+     * @return self
+     */
+    public function withReadableLink($readableLink)
+    {
+        $metadata = clone $this;
+        $metadata->readableLink = $readableLink;
+
+        return $metadata;
     }
 
     /**
@@ -163,5 +258,20 @@ class Metadata
     public function getIri()
     {
         return $this->iri;
+    }
+
+    /**
+     * Returns a new instance of Metadata with the given IRI.
+     *
+     * @param string|null $iri
+     *
+     * @return self
+     */
+    public function withIri($iri)
+    {
+        $metadata = clone $this;
+        $metadata->iri = $iri;
+
+        return $metadata;
     }
 }

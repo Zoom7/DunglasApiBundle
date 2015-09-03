@@ -16,7 +16,7 @@ namespace Dunglas\ApiBundle\Mapping\Property;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ResourcePropertyCollection implements \IteratorAggregate, \Countable
+class Collection implements \IteratorAggregate, \Countable
 {
     /**
      * @var string[]
@@ -45,16 +45,5 @@ class ResourcePropertyCollection implements \IteratorAggregate, \Countable
     public function count()
     {
         return count($this->properties);
-    }
-
-    /**
-     * Creates a new instance containing classes from the current instance and the instance passed in argument.
-     *
-     * @param self $collection
-     *
-     * @return self
-     */
-    public function merge(Collection $collection) {
-        return new self(array_merge($this->properties, $collection->properties));
     }
 }
