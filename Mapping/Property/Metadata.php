@@ -11,14 +11,14 @@
 
 namespace Dunglas\ApiBundle\Mapping\Property;
 
-use PropertyInfo\Type;
+use Symfony\Component\PropertyInfo\Type;
 
 /**
  * Property metadata.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Metadata
+final class Metadata
 {
     /**
      * @var Type|null

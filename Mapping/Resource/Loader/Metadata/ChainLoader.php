@@ -9,22 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Property\Loader;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Metadata;
 
 /**
  * Chain loader.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class MetadataLoaderChain implements MetadataLoaderInterface
+final class ChainLoader implements LoaderInterface
 {
     /**
-     * @var MetadataLoaderInterface[]
-     */
-    private $loaders;
-
-    /**
-     * @param MetadataLoaderInterface[] $loaders
+     * @param LoaderInterface[] $loaders
      */
     public function __construct(array $loaders)
     {
@@ -34,10 +29,10 @@ class MetadataLoaderChain implements MetadataLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function getMetadata($resourceClass, $name, array $options)
+    public function getMetadata($name)
     {
         foreach ($this->loaders as $loader) {
-            $metadata = $loader->getMetadata($resourceClass, $name, $options);
+            $metadata = $loader->getMetadata($name);
 
             if (null !== $metadata) {
                 return $metadata;

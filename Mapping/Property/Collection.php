@@ -16,7 +16,7 @@ namespace Dunglas\ApiBundle\Mapping\Property;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Collection implements \IteratorAggregate, \Countable
+final class Collection implements \IteratorAggregate, \Countable
 {
     /**
      * @var string[]

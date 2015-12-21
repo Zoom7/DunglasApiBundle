@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Annotation;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Metadata;
 
 use Doctrine\Common\Annotations\Reader;
 use Dunglas\ApiBundle\Annotation\Iri;
@@ -18,29 +18,22 @@ use Dunglas\ApiBundle\Annotation\Operation as OperationAnnotation;
 use Dunglas\ApiBundle\Mapping\Resource\PaginationSettings;
 use Dunglas\ApiBundle\Mapping\Resource\Operation;
 use Dunglas\ApiBundle\Mapping\Resource\Metadata;
-use Dunglas\ApiBundle\Mapping\Resource\Loader\MetadataLoaderInterface;
-use Dunglas\ApiBundle\Mapping\Util\ShortNameGuesser;
 
 /**
  * Parses Resource annotation.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ResourceClassMetadataLoader implements MetadataLoaderInterface
+final class AnnotationLoader implements LoaderInterface
 {
     /**
      * @var Reader
      */
     private $reader;
-    /**
-     * @var ShortNameGuesser
-     */
-    private $shortNameGuesser;
 
     public function __construct(Reader $reader)
     {
         $this->reader = $reader;
-        $this->shortNameGuesser = new ShortNameGuesser();
     }
 
     /**
@@ -65,10 +58,9 @@ class ResourceClassMetadataLoader implements MetadataLoaderInterface
             $collectionOperations[] = $this->getOperation($collectionOperationAnnotation);
         }
 
-        $shortName = null === $resourceAnnotation->shortName ? $this->shortNameGuesser($name) : $resourceAnnotation->shortName;
         $iri = $this->reader->getClassAnnotation($reflectionClass, Iri::class);
 
-        return new Metadata($name, $shortName, $itemOperations, $collectionOperations, $iri);
+        return new Metadata($name, null, $itemOperations, $collectionOperations, $iri);
     }
 
     /**

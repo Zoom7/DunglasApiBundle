@@ -9,11 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Property\Loader\Annotation;
+namespace Dunglas\ApiBundle\Mapping\Property\Loader\Metadata;
 
 use Doctrine\Common\Annotations\Reader;
 use Dunglas\ApiBundle\Annotation\Property;
-use Dunglas\ApiBundle\Mapping\Property\Loader\MetadataLoaderInterface;
 use Dunglas\ApiBundle\Mapping\Property\Metadata;
 use Dunglas\ApiBundle\Util\Reflection;
 
@@ -22,7 +21,7 @@ use Dunglas\ApiBundle\Util\Reflection;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class MetadataLoader implements MetadataLoaderInterface
+final class AnnotationLoader implements LoaderInterface
 {
     /**
      * @var Reader

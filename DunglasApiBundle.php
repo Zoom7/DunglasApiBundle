@@ -13,7 +13,7 @@ namespace Dunglas\ApiBundle;
 
 use Dunglas\ApiBundle\DependencyInjection\Compiler\DataProviderPass;
 use Dunglas\ApiBundle\DependencyInjection\Compiler\DoctrineQueryExtensionPass;
-use Dunglas\ApiBundle\DependencyInjection\Compiler\ResourceTypePass;
+use Dunglas\ApiBundle\DependencyInjection\Compiler\MappingLoaderPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -31,7 +31,7 @@ class DunglasApiBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new ResourceTypePass());
+        $container->addCompilerPass(new MappingLoaderPass());
         $container->addCompilerPass(new DataProviderPass());
         $container->addCompilerPass(new DoctrineQueryExtensionPass());
     }

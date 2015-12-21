@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="api.mapping.cache.prefix" />
+    </parameters>
+
+    <services>
+        <!-- Cache -->
+
+        <service id="api.cache" alias="api.cache.apcu" />
+
+        <service id="api.cache.apcu" class="Doctrine\Common\Cache\ApcuCache" public="false">
+            <call method="setNamespace">
+                <argument>api.mapping.cache.prefix</argument>
+            </call>
+        </service>
+
+        <!-- Resource collection loaders -->
+
+        <service id="api.mapping.resource.loader.collection.cache_decorator" class="Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Resource\CollectionLoaderDecorator" decorates="api.mapping.resource.loader.collection" public="false">
+            <argument type="service" id="api.mapping.resource.loader.collection.cache_decorator.inner" />
+            <argument type="service" id="api.cache"></argument>
+        </service>
+
+        <!-- Resource metadata loaders -->
+
+        <service id="api.mapping.resource.loader.metadata.cache_decorator" class="Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Resource\MetadataLoaderDecorator" decorates="api.mapping.resource.loader.metadata" public="false">
+            <argument type="service" id="api.mapping.resource.loader.metadata.cache_decorator.inner" />
+            <argument type="service" id="api.cache"></argument>
+        </service>
+
+        <!-- Property collection loaders -->
+
+        <service id="api.mapping.property.loader.collection.cache_decorator" class="Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Property\CollectionLoaderDecorator" decorates="api.mapping.property.loader.collection" public="false">
+            <argument type="service" id="api.mapping.property.loader.collection.cache_decorator.inner" />
+            <argument type="service" id="api.cache"></argument>
+        </service>
+
+        <!-- Property metadata loader -->
+
+        <service id="api.mapping.property.loader.metadata.cache_decorator" class="Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Property\MetadataLoaderDecorator" decorates="api.mapping.property.loader.metadata" public="false">
+            <argument type="service" id="api.mapping.property.loader.metadata.cache_decorator.inner" />
+            <argument type="service" id="api.cache"></argument>
+        </service>
+
+    </services>
+
+</container>

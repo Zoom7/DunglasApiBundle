@@ -16,7 +16,7 @@ namespace Dunglas\ApiBundle\Mapping\Resource;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Metadata
+final class Metadata
 {
     /**
      * @var string

@@ -12,19 +12,19 @@
 namespace Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Resource;
 
 use Doctrine\Common\Cache\Cache;
-use Dunglas\ApiBundle\Mapping\Resource\Loader\CollectionLoaderInterface;
+use Dunglas\ApiBundle\Mapping\Resource\Loader\Collection\LoaderInterface;
 
 /**
  * Cache decorator.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class CollectionLoaderDecorator implements CollectionLoaderInterface
+class LoaderDecorator implements LoaderInterface
 {
     const KEY = 'rc';
 
     /**
-     * @var CollectionLoaderInterface
+     * @var LoaderInterface
      */
     private $loader;
     /**
@@ -32,7 +32,7 @@ class CollectionLoaderDecorator implements CollectionLoaderInterface
      */
     private $cache;
 
-    public function __construct(CollectionLoaderInterface $loader, Cache $cache)
+    public function __construct(LoaderInterface $loader, Cache $cache)
     {
         $this->loader = $loader;
         $this->cache = $cache;

@@ -9,24 +9,22 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Property;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Cache\Property;
 
 use Doctrine\Common\Cache\Cache;
-use Dunglas\ApiBundle\Mapping\Property\Loader\CollectionLoaderInterface;
-use Dunglas\ApiBundle\Mapping\ResourceClassCollection\ResourceAttributeCollection;
-use Dunglas\ApiBundle\Mapping\ResourceClassCollection\ResourcePropertyCollectionLoaderInterface;
+use Dunglas\ApiBundle\Mapping\Property\Loader\Collection\LoaderInterface;
 
 /**
  * Cache decorator.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class CollectionLoaderDecoractor implements CollectionLoaderInterface
+final class LoaderDecorator implements LoaderInterface
 {
     const KEY_PATTERN = 'pc_%s_%s';
 
     /**
-     * @var CollectionLoaderInterface
+     * @var LoaderInterface
      */
     private $loader;
     /**
@@ -34,7 +32,7 @@ class CollectionLoaderDecoractor implements CollectionLoaderInterface
      */
     private $cache;
 
-    public function __construct(CollectionLoaderInterface $loader, Cache $cache)
+    public function __construct(LoaderInterface $loader, Cache $cache)
     {
         $this->loader = $loader;
         $this->cache = $cache;
@@ -51,7 +49,7 @@ class CollectionLoaderDecoractor implements CollectionLoaderInterface
             return $this->cache->fetch($key);
         }
 
-        $attributeCollection = $this->loader->getResourceAttributeCollection($resourceClass, $options);
+        $attributeCollection = $this->loader->getCollection($resourceClass, $options);
         $this->cache->save($key, $attributeCollection);
 
         return $attributeCollection;

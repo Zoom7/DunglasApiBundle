@@ -12,19 +12,19 @@
 namespace Dunglas\ApiBundle\Bridge\Doctrine\Cache\Mapping\Property;
 
 use Doctrine\Common\Cache\Cache;
-use Dunglas\ApiBundle\Mapping\Property\Loader\MetadataLoaderInterface;
+use Dunglas\ApiBundle\Mapping\Property\Loader\Metadata\LoaderInterface;
 
 /**
  * Property metadata loader cache decorator.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class MetadataLoaderDecorator implements MetadataLoaderInterface
+final class LoaderDecorator implements LoaderInterface
 {
     const KEY_PATTERN = 'p_%s_%s_%s';
 
     /**
-     * @var MetadataLoaderInterface
+     * @var LoaderInterface
      */
     private $loader;
     /**
@@ -32,7 +32,7 @@ class MetadataLoaderDecorator implements MetadataLoaderInterface
      */
     private $cache;
 
-    public function __construct(MetadataLoaderInterface $loader, Cache $cache)
+    public function __construct(LoaderInterface $loader, Cache $cache)
     {
         $this->loader = $loader;
         $this->cache = $cache;

@@ -9,19 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Annotation;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Collection;
 
 use Doctrine\Common\Annotations\Reader;
 use Dunglas\ApiBundle\Annotation\Resource;
 use Dunglas\ApiBundle\Mapping\Resource\Collection;
-use Dunglas\ApiBundle\Mapping\Resource\Loader\CollectionLoaderInterface;
 
 /**
  * Loads resource class annotated with the Resource annotation.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class CollectionLoader implements CollectionLoaderInterface
+final class AnnotationLoader implements LoaderInterface
 {
     /**
      * @var Reader

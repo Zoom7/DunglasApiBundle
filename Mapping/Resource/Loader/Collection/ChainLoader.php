@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Resource\Loader;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Collection;
 
 use Dunglas\ApiBundle\Mapping\Resource\Collection;
 
@@ -18,15 +18,15 @@ use Dunglas\ApiBundle\Mapping\Resource\Collection;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class CollectionChainLoader implements CollectionLoaderInterface
+final class ChainLoader implements LoaderInterface
 {
     /**
-     * @var CollectionLoaderInterface[]
+     * @var LoaderInterface[]
      */
     private $loaders;
 
     /**
-     * @param CollectionLoaderInterface[] $loaders
+     * @param LoaderInterface[] $loaders
      */
     public function __construct(array $loaders)
     {

@@ -16,21 +16,16 @@ namespace Dunglas\ApiBundle\Mapping\Resource;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Operation
+final class Operation
 {
     /**
      * @var array
      */
     private $attributes;
-    /**
-     * @var PaginationSettings
-     */
-    private $paginationSettings;
 
-    public function __construct(array $attributes, PaginationSettings $paginationSettings)
+    public function __construct(array $attributes)
     {
         $this->attributes = $attributes;
-        $this->paginationSettings = $paginationSettings;
     }
 
     /**
@@ -41,15 +36,5 @@ class Operation
     public function getAttributes()
     {
        return $this->attributes;
-    }
-
-    /**
-     * Gets pagination settings if applicable.
-     *
-     * @return PaginationSettings|null
-     */
-    public function getPaginationSettings()
-    {
-        return $this->paginationSettings;
     }
 }

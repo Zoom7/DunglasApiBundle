@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Property\Loader;
+namespace Dunglas\ApiBundle\Mapping\Property\Loader\Collection;
 
 use Dunglas\ApiBundle\Mapping\Property\Collection;
 
@@ -18,7 +18,7 @@ use Dunglas\ApiBundle\Mapping\Property\Collection;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-interface CollectionLoaderInterface
+interface LoaderInterface
 {
     /**
      * Gets resource properties for the given options.

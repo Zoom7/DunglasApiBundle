@@ -4,70 +4,55 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <parameters>
-        <parameter key="api.mapping.cache.prefix" />
-    </parameters>
-
     <services>
-        <!-- Factories -->
+        <!-- Resource collection loaders -->
 
-        <service id="api.mapping.class_metadata_factory" class="Dunglas\ApiBundle\Mapping\Factory\ClassMetadataFactory">
-            <argument type="service" id="api.mapping.loaders.chain" />
+        <service id="api.mapping.resource.loader.collection" alias="api.mapping.resource.loader.collection.chain" />
+
+        <service id="api.mapping.resource.loader.collection.chain" class="Dunglas\ApiBundle\Mapping\Resource\Loader\CollectionChainLoader" public="false" />
+
+        <!-- Resource metadata loaders -->
+
+        <service id="api.mapping.resource.loader.metadata" alias="api.mapping.resource.loader.metadata.chain" />
+
+        <service id="api.mapping.resource.loader.metadata.chain" class="Dunglas\ApiBundle\Mapping\Resource\Loader\MetadataChainLoader" public="false" />
+
+        <service id="api.mapping.resource.loader.metadata.php_doc_description_decorator" class="Dunglas\ApiBundle\Mapping\Resource\Loader\MetadataPhpDocDescriptionLoaderDecorator" decorates="api.mapping.resource.loader.metadata" public="false">
+            <argument type="service" id="api.mapping.resource.loader.metadata.php_doc_description_decorator.inner" />
         </service>
 
-        <service id="api.mapping.attribute_metadata_factory" class="Dunglas\ApiBundle\Mapping\Factory\AttributeMetadataFactory" public="false">
-            <argument type="service" id="api.property_info" />
-            <argument type="service" id="api.resource_collection" />
+        <service id="api.mapping.resource.loader.metadata.short_name_guesser_decorator" class="Dunglas\ApiBundle\Mapping\Resource\Loader\MetadataShortNameGuesserLoaderDecorator" decorates="api.mapping.resource.loader.metadata" public="false">
+            <argument type="service" id="api.mapping.resource.loader.metadata.php_doc_description_decorator.inner" />
         </service>
 
-        <!-- Cache -->
+        <!-- Property collection loaders -->
 
-        <service id="api.cache_warmer.metadata" class="Dunglas\ApiBundle\CacheWarmer\MetadataCacheWarmer" public="false">
-            <argument type="service" id="api.resource_collection" />
-            <argument type="service" id="api.mapping.class_metadata_factory" />
+        <service id="api.mapping.property.loader.collection" alias="api.mapping.property.loader.collection.chain" />
 
-            <tag name="kernel.cache_warmer" priority="0" />
+        <service id="api.mapping.property.loader.collection.chain" class="Dunglas\ApiBundle\Mapping\Property\Loader\CollectionChainLoader" public="false" />
+
+        <service id="api.mapping.property.loader.collection.annotation" class="Dunglas\ApiBundle\Mapping\Property\Loader\Annotation\CollectionLoader" public="false">
+            <argument type="service" id="annotation_reader" />
+
+            <tag name="api.mapping.property.loader.collection" priority="-100" />
         </service>
 
-        <service id="api.mapping.cache.apc" class="Doctrine\Common\Cache\ApcCache" public="false">
-            <call method="setNamespace">
-                <argument>%api.mapping.cache.prefix%</argument>
-            </call>
+        <service id="api.mapping.property.loader.collection.reflection" class="Dunglas\ApiBundle\Mapping\Property\Loader\Reflection\CollectionLoader" public="false">
+            <tag name="api.mapping.property.loader.collection" priority="-101" />
         </service>
 
-        <!-- Loaders -->
+        <!-- Property metadata loader -->
 
-        <service id="api.mapping.loaders.chain" class="Dunglas\ApiBundle\Mapping\Loader\LoaderChain" public="false">
-            <argument type="collection">
-                <argument type="service" id="api.mapping.loaders.serializer_metadata" />
-                <argument type="service" id="api.mapping.loaders.reflection" />
-                <argument type="service" id="api.mapping.loaders.validator_metadata" />
-                <argument type="service" id="api.mapping.loaders.phpdoc" />
-                <argument type="service" id="api.doctrine.mapping.loaders.identifier" on-invalid="ignore" />
-                <argument type="service" id="api.mapping.loaders.annotation" />
-            </argument>
+        <service id="api.mapping.property.loader.metadata" alias="api.mapping.property.loader.metadata.chain" />
+
+        <service id="api.mapping.property.loader.metadata.chain" class="Dunglas\ApiBundle\Mapping\Property\Loader\MetadataChainLoader" public="false" />
+
+        <service id="api.mapping.property.loader.metadata.annotation" class="Dunglas\ApiBundle\Mapping\Property\Loader\Annotation\MetadataLoader" public="false">
+            <argument type="service" id="annotation_reader" />
+
+            <tag name="api.mapping.property.loader.collection" priority="" />
         </service>
 
-        <service id="api.mapping.loaders.serializer_metadata" class="Dunglas\ApiBundle\Mapping\Loader\SerializerMetadataLoader" public="false">
-            <argument type="service" id="api.mapping.attribute_metadata_factory" />
-            <argument type="service" id="serializer.mapping.class_metadata_factory" />
-        </service>
-
-        <service id="api.mapping.loaders.reflection" class="Dunglas\ApiBundle\Mapping\Loader\ReflectionLoader" public="false">
-            <argument type="service" id="api.mapping.attribute_metadata_factory" />
-        </service>
-
-        <service id="api.mapping.loaders.validator_metadata" class="Dunglas\ApiBundle\Mapping\Loader\ValidatorMetadataLoader" public="false">
-            <argument type="service" id="validator" />
-        </service>
-
-        <service id="api.mapping.loaders.phpdoc" class="Dunglas\ApiBundle\Mapping\Loader\PhpDocLoader" public="false">
-            <argument type="service" id="api.property_info" />
-        </service>
-
-        <service id="api.mapping.loaders.annotation" class="Dunglas\ApiBundle\Mapping\Loader\AnnotationLoader" public="false">
-            <argument type="service" id="annotations.reader" />
-        </service>
     </services>
 
 </container>

@@ -9,9 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Resource\Loader;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Metadata;
 
-use Dunglas\ApiBundle\Util\ReflectionTrait;
 use \phpDocumentor\Reflection\ClassReflector;
 use phpDocumentor\Reflection\FileReflector;
 use PropertyInfo\PropertyInfoInterface;
@@ -21,7 +20,7 @@ use PropertyInfo\PropertyInfoInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class MetadataPhpDocDescriptionLoaderDecorator implements MetadataLoaderInterface
+final class PhpDocDescriptionLoaderDecorator implements LoaderInterface
 {
     /**
      * @var FileReflector[]
@@ -32,11 +31,11 @@ class MetadataPhpDocDescriptionLoaderDecorator implements MetadataLoaderInterfac
      */
     private static $classReflectors = [];
     /**
-     * @var MetadataLoaderInterface
+     * @var LoaderInterface
      */
     private $loader;
 
-    public function __construct(MetadataLoaderInterface $loader)
+    public function __construct(LoaderInterface $loader)
     {
         $this->loader = $loader;
     }

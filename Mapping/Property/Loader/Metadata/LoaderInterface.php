@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Property\Loader;
+namespace Dunglas\ApiBundle\Mapping\Property\Loader\Metadata;
 
 use Dunglas\ApiBundle\Mapping\Property\Metadata;
 
@@ -18,7 +18,7 @@ use Dunglas\ApiBundle\Mapping\Property\Metadata;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-interface MetadataLoaderInterface
+interface LoaderInterface
 {
     /**
      * Gets a property metadata.

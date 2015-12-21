@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Resource\Loader;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Metadata;
 
 use Dunglas\ApiBundle\Mapping\Resource\Metadata;
 
@@ -18,7 +18,7 @@ use Dunglas\ApiBundle\Mapping\Resource\Metadata;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-interface MetadataLoaderInterface
+interface LoaderInterface
 {
     /**
      * Gets resource class metadata.

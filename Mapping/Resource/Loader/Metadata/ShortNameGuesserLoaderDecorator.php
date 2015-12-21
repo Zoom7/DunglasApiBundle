@@ -9,21 +9,21 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Mapping\Resource\Loader;
+namespace Dunglas\ApiBundle\Mapping\Resource\Loader\Metadata;
 
 /**
  * Guesses the short name if not set.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class MetadataShortNameGuesserLoaderDecorator implements MetadataLoaderInterface
+final class ShortNameGuesserLoaderDecorator implements LoaderInterface
 {
     /**
-     * @var MetadataLoaderInterface
+     * @var LoaderInterface
      */
     private $loader;
 
-    public function __construct(MetadataLoaderInterface $loader)
+    public function __construct(LoaderInterface $loader)
     {
         $this->loader = $loader;
     }

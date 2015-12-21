@@ -9,6 +9,8 @@
 
         <service id="api.property_accessor" alias="property_accessor" />
 
+        <service id="api.property_info" alias="property_info" />
+
         <service id="api.resource_type_registry" class="Dunglas\ApiBundle\Api\ResourceTypeRegistry" lazy="true" />
 
         <service id="api.data_provider" class="Dunglas\ApiBundle\Model\DataProviderChain" lazy="true" />
