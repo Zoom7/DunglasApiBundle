@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class DunglasApiExtension extends Extension implements PrependExtensionInterface
+final class DunglasApiExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * {@inheritdoc}

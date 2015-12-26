@@ -19,7 +19,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Configuration implements ConfigurationInterface
+final class Configuration implements ConfigurationInterface
 {
     /**
      * {@inheritdoc}

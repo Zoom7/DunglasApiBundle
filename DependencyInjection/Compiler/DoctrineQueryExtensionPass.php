@@ -21,10 +21,8 @@ use Symfony\Component\DependencyInjection\Reference;
  * @author Samuel ROZE <samuel.roze@gmail.com>
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class DoctrineQueryExtensionPass implements CompilerPassInterface
+final class DoctrineQueryExtensionPass implements CompilerPassInterface
 {
-    use FindSortedServicesTrait;
-
     /**
      * {@inheritdoc}
      */
@@ -39,5 +37,26 @@ class DoctrineQueryExtensionPass implements CompilerPassInterface
         }
     }
 
+    /**
+     * Finds services having the given tag and sorts them by their priority attribute.
+     *
+     * @param ContainerBuilder $container
+     * @param string           $tag
+     *
+     * @return Reference[]
+     */
+    private function findSortedServices(ContainerBuilder $container, $tag)
+    {
+        $extensions = [];
+        foreach ($container->findTaggedServiceIds($tag) as $serviceId => $tags) {
+            foreach ($tags as $tag) {
+                $priority = isset($tag['priority']) ? $tag['priority'] : 0;
+                $extensions[$priority][] = new Reference($serviceId);
+            }
+        }
+        krsort($extensions);
 
+        // Flatten the array
+        return empty($extensions) ? [] : call_user_func_array('array_merge', $extensions);
+    }
 }

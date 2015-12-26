@@ -12,41 +12,57 @@
 namespace Dunglas\ApiBundle\Annotation;
 
 /**
- * Property.
+ * Property annotation.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  *
  * @Annotation
  * @Target({"METHOD", "PROPERTY"})
  */
-class Property
+final class Property
 {
     /**
      * @var string|null
      */
     public $description;
+
     /**
      * @var bool|null
      */
     public $readable;
+
     /**
      * @var bool|null
      */
     public $writable;
+
     /**
      * @var bool|null
      */
     public $readableLink;
+
     /**
      * @var bool|null
      */
     public $writableLink;
+
     /**
      * @var bool|null
      */
     public $required;
+
     /**
      * @var string|null
      */
     public $iri;
+
+    /**
+     * @var bool|null
+     */
+    public $identifier;
+
+    /**
+     * @var array
+     */
+    public $attributes;
 }

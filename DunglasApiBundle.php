@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class DunglasApiBundle extends Bundle
+final class DunglasApiBundle extends Bundle
 {
     /**
      * {@inheritdoc}
@@ -31,7 +31,6 @@ class DunglasApiBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new MappingLoaderPass());
         $container->addCompilerPass(new DataProviderPass());
         $container->addCompilerPass(new DoctrineQueryExtensionPass());
     }

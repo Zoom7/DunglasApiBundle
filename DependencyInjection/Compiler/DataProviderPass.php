@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\Reference;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class DataProviderPass implements CompilerPassInterface
+final class DataProviderPass implements CompilerPassInterface
 {
     /**
      * {@inheritdoc}

@@ -19,26 +19,35 @@ namespace Dunglas\ApiBundle\Annotation;
  * @Annotation
  * @Target({"CLASS"})
  */
-class Resource
+final class Resource
 {
     /**
-     * @var string
+     * @var string|null
      */
     public $shortName;
+
     /**
-     * @var string
+     * @var string|null
+     */
+    public $description;
+
+    /**
+     * @var string|null
      */
     public $iri;
+
     /**
-     * @var string
-     */
-    public $description = '';
-    /**
-     * @var Operation[]
+     * @var array|null
      */
     public $itemOperations;
+
     /**
-     * @var Operation[]
+     * @var array|null
      */
     public $collectionOperations;
+
+    /**
+     * @var array
+     */
+    public $attributes;
 }
