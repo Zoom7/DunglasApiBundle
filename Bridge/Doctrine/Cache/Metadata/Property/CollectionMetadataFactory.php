@@ -19,7 +19,7 @@ use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterfa
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class ItemMetadataFactory implements CollectionMetadataFactoryInterface
+final class CollectionMetadataFactory implements CollectionMetadataFactoryInterface
 {
     const KEY_PATTERN = 'pc_%s_%s';
 

@@ -66,8 +66,7 @@ final class DunglasApiExtension extends Extension implements PrependExtensionInt
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('api.xml');
-        $loader->load('property_info.xml');
-        $loader->load('mapping.xml');
+        $loader->load('metadata.xml');
 
         $this->enableJsonLd($loader);
         $this->registerAnnotationLoaders($container);

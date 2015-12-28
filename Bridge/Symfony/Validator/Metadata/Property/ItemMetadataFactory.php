@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Mapping\Factory\MetadataFactoryInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class MetadataLoaderDecorator implements ItemMetadataFactoryInterface
+final class ItemMetadataFactory implements ItemMetadataFactoryInterface
 {
     /**
      * @var string[] A list of constraint classes making the entity required.

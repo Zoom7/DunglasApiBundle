@@ -12,13 +12,19 @@
 namespace Dunglas\ApiBundle\Tests\Behat\TestBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Dunglas\ApiBundle\Annotation\Resource;
 use FOS\UserBundle\Model\User as BaseUser;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity
+ * @Resource(attributes={
+ *     "normalization-context" = {"user", "user-read"},
+ *     "denormalization-context" = {"user", "user-write"}
+ * })
  *
  * @author Théo FIDRY <theo.fidry@gmail.com>
+ * @author Kévin Dunglas <dunglas@gmail.com>
  */
 class User extends BaseUser
 {
