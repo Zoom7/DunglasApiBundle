@@ -226,8 +226,8 @@ final class ItemMetadata
      */
     private function getOperationAttribute(array $operations, string $operationName, string $key, $defaultValue = null, bool $resourceFallback = false)
     {
-        if (isset($operations[$operationName]->getAttributes()[$key])) {
-            return isset($operations[$operationName]->getAttributes()[$key]);
+        if (isset($operations[$operationName][$key])) {
+            return isset($operations[$operationName][$key]);
         }
 
         if ($resourceFallback && isset($this->attributes[$key])) {
@@ -245,6 +245,23 @@ final class ItemMetadata
     public function getAttributes() : array
     {
         return $this->attributes;
+    }
+
+    /**
+     * Gets an attribute.
+     *
+     * @param string $key
+     * @param mixed  $defaultValue
+     *
+     * @return mixed
+     */
+    public function getAttribute(string $key, $defaultValue = null)
+    {
+        if (isset($this->attributes[$key])) {
+            return $this->attributes[$key];
+        }
+
+        return $defaultValue;
     }
 
     /**

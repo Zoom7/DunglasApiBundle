@@ -14,9 +14,13 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
+use Dunglas\ApiBundle\Exception\ResourceClassNotSupportedException;
 use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Api\DataProviderInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\QueryItemExtensionInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\QueryResultExtensionInterface;
 
 /**
  * Data provider for the Doctrine ORM.
@@ -63,14 +67,8 @@ final class DataProvider implements DataProviderInterface
      * @param QueryCollectionExtensionInterface[] $collectionExtensions
      * @param QueryItemExtensionInterface[]       $itemExtensions
      */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        CollectionMetadataFactoryInterface $collectionMetadataFactory,
-        ItemMetadataFactoryInterface $itemMetadataFactory,
-        DataProviderInterface $decorated = null,
-        array $collectionExtensions = [],
-        array $itemExtensions = []
-    ) {
+    public function __construct(ManagerRegistry $managerRegistry, CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, DataProviderInterface $decorated = null, array $collectionExtensions = [], array $itemExtensions = [])
+    {
         $this->managerRegistry = $managerRegistry;
         $this->collectionMetadataFactory = $collectionMetadataFactory;
         $this->itemMetadataFactory = $itemMetadataFactory;
@@ -82,10 +80,18 @@ final class DataProvider implements DataProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function getItem(string $resourceClass, $id, bool $fetchData = false)
+    public function getItem(string $resourceClass, $id, string $operationName = null, bool $fetchData = false)
     {
-        if ($this->decorated && $item = $this->decorated->getItem($resourceClass, $id, $fetchData)) {
-            return $item;
+        if ($this->decorated) {
+            try {
+                 return $this->decorated->getItem($resourceClass, $id, $operationName, $fetchData);
+            } catch (ResourceClassNotSupportedException $resourceClassNotSupportedException) {
+                // Ignore it
+            }
+        }
+
+        if (!$this->supports($resourceClass)) {
+            throw new ResourceClassNotSupportedException();
         }
 
         $manager = $this->managerRegistry->getManagerForClass($resourceClass);
@@ -126,7 +132,7 @@ final class DataProvider implements DataProviderInterface
         }
 
         foreach ($this->itemExtensions as $extension) {
-            $extension->applyToItem($resourceClass, $queryBuilder, $identifiers);
+            $extension->applyToItem($queryBuilder, $resourceClass, $identifiers, $operationName);
         }
 
         return $queryBuilder->getQuery()->getOneOrNullResult();
@@ -135,17 +141,29 @@ final class DataProvider implements DataProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function getCollection(string $resourceClass)
+    public function getCollection(string $resourceClass, string $operationName = null)
     {
+        if ($this->decorated) {
+            try {
+                return $this->decorated->getCollection($resourceClass, $operationName);
+            } catch (ResourceClassNotSupportedException $resourceClassNotSupportedException) {
+                // Ignore it
+            }
+        }
+
+        if (!$this->supports($resourceClass)) {
+            throw new ResourceClassNotSupportedException();
+        }
+
         $manager = $this->managerRegistry->getManagerForClass($resourceClass);
         $repository = $manager->getRepository($resourceClass);
         $queryBuilder = $repository->createQueryBuilder('o');
 
         foreach ($this->collectionExtensions as $extension) {
-            $extension->applyToCollection($resourceClass, $queryBuilder);
+            $extension->applyToCollection($queryBuilder, $resourceClass, $operationName);
 
             if ($extension instanceof QueryResultExtensionInterface) {
-                if ($extension->supportsResult($resourceClass)) {
+                if ($extension->supportsResult($resourceClass, $operationName)) {
                     return $extension->getResult($queryBuilder);
                 }
             }
@@ -155,9 +173,9 @@ final class DataProvider implements DataProviderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Is this class supported
      */
-    public function supports(string $resourceClass) : bool
+    private function supports(string $resourceClass) : bool
     {
         return null !== $this->managerRegistry->getManagerForClass($resourceClass);
     }

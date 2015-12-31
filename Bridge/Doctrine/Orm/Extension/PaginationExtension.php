@@ -14,10 +14,10 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineOrmPaginator;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Paginator;
-use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryResultExtensionInterface;
 use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Util\QueryChecker;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -40,40 +40,102 @@ class PaginationExtension implements QueryResultExtensionInterface
     private $requestStack;
 
     /**
-     * @param ManagerRegistry $managerRegistry
-     * @param RequestStack    $requestStack
+     * @var ItemMetadataFactoryInterface
      */
-    public function __construct(ManagerRegistry $managerRegistry, RequestStack $requestStack)
+    private $itemMetadataFactory;
+
+    /**
+     * @var bool
+     */
+    private $enabled;
+
+    /**
+     * @var bool
+     */
+    private $clientEnabled;
+
+    /**
+     * @var bool
+     */
+    private $clientItemsPerPage;
+
+    /**
+     * @var int
+     */
+    private $itemsPerPage;
+
+    /**
+     * @var string
+     */
+    private $pageParameterName;
+
+    /**
+     * @var string
+     */
+    private $enabledParameterName;
+
+    /**
+     * @var string
+     */
+    private $itemsPerPageParameterName;
+
+    public function __construct(ManagerRegistry $managerRegistry, RequestStack $requestStack, ItemMetadataFactoryInterface $itemMetadataFactory, bool $enabled = true, bool $clientEnabled = false, bool $clientItemsPerPage = false, int $itemsPerPage = 30, string $pageParameterName = 'page', string $enabledParameterName = 'pagination', string $itemsPerPageParameterName = 'itemsPerPage')
     {
         $this->managerRegistry = $managerRegistry;
         $this->requestStack = $requestStack;
+        $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->enabled = $enabled;
+        $this->clientEnabled = $clientEnabled;
+        $this->clientItemsPerPage = $clientItemsPerPage;
+        $this->itemsPerPage = $itemsPerPage;
+        $this->pageParameterName = $pageParameterName;
+        $this->enabledParameterName = $enabledParameterName;
+        $this->itemsPerPageParameterName = $itemsPerPageParameterName;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder)
+    public function applyToCollection(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         $request = $this->requestStack->getCurrentRequest();
-        if (null === $request || !$this->isPaginationEnabled($resourceClass, $request)) {
+        if (null === $request) {
             return;
         }
 
-        $itemsPerPage = $this->getItemsPerPage($resourceClass, $request);
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+        if (!$this->isPaginationEnabled($request, $itemMetadata, $operationName)) {
+            return;
+        }
+
+        $pageParameter = $itemMetadata->getCollectionOperationAttribute($operationName, 'pagination_page_parameter', $this->pageParameterName, true);
+
+        $itemsPerPage = $itemMetadata->getCollectionOperationAttribute($operationName, 'pagination_page_parameter', $this->pageParameterName, true);
+        if ($itemMetadata->getCollectionOperationAttribute($operationName, 'pagination_client_items_per_page', $this->clientItemsPerPage, true)) {
+            $itemsPerPage = (int) $request->query->get($this->itemsPerPageParameterName, $itemsPerPage);
+        }
+
+        $page = $request->query->get($pageParameter, 1);
 
         $queryBuilder
-            ->setFirstResult(($this->getPage($resourceClass, $request) - 1) * $itemsPerPage)
-            ->setMaxResults($itemsPerPage);
+            ->setFirstResult(($page - 1) * $itemsPerPage)
+            ->setMaxResults($itemsPerPage)
+        ;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function supportsResult(string $resourceClass) : bool
+    public function supportsResult(string $resourceClass, string $operationName = null) : bool
     {
         $request = $this->requestStack->getCurrentRequest();
+        if (null === $request) {
+            return false;
+        }
 
-        return $request !== null && $this->isPaginationEnabled($resourceClass, $request);
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+
+        return $this->isPaginationEnabled($request, $itemMetadata, $operationName);
     }
 
     /**
@@ -87,55 +149,16 @@ class PaginationExtension implements QueryResultExtensionInterface
         return new Paginator($doctrineOrmPaginator);
     }
 
-    /**
-     * Checks if the pagination is enabled or not.
-     *
-     * @param string  $resourceClass
-     * @param Request $request
-     *
-     * @return bool
-     */
-    private function isPaginationEnabled(string $resourceClass, Request $request) : bool
+    private function isPaginationEnabled(Request $request, ItemMetadata $itemMetadata, string $operationName = null) : bool
     {
-        $clientPagination = $request->get($resource->getEnablePaginationParameter());
+        $enabled = $itemMetadata->getCollectionOperationAttribute($operationName, 'pagination_enabled', $this->enabled, true);
+        $clientEnabled = $itemMetadata->getCollectionOperationAttribute($operationName, 'pagination_client_enabled', $this->clientEnabled, true);
 
-        if ($resource->isClientAllowedToEnablePagination() && null !== $clientPagination) {
-            return (bool) $clientPagination;
+        if ($clientEnabled) {
+            $enabled = filter_var($request->query->get($this->enabledParameterName, $enabled), FILTER_VALIDATE_BOOLEAN);
         }
 
-        return $resource->isPaginationEnabledByDefault();
-    }
-
-    /**
-     * Gets the current page.
-     *
-     * @param ResourceInterface $resource
-     * @param Request           $request
-     *
-     * @return float
-     */
-    private function getPage(ResourceInterface $resource, Request $request)
-    {
-        return (float) $request->get($resource->getPageParameter(), 1.);
-    }
-
-    /**
-     * Gets the number of items per page to display.
-     *
-     * @param ResourceInterface $resource
-     * @param Request           $request
-     *
-     * @return float
-     */
-    private function getItemsPerPage(ResourceInterface $resource, Request $request)
-    {
-        if ($resource->isClientAllowedToChangeItemsPerPage()
-            && $itemsPerPage = $request->get($resource->getItemsPerPageParameter())
-        ) {
-            return (float) $itemsPerPage;
-        }
-
-        return $resource->getItemsPerPageByDefault();
+        return $enabled;
     }
 
     /**
@@ -145,7 +168,7 @@ class PaginationExtension implements QueryResultExtensionInterface
      *
      * @return bool
      */
-    private function useOutputWalkers(QueryBuilder $queryBuilder)
+    private function useOutputWalkers(QueryBuilder $queryBuilder) : bool
     {
         /*
          * "Cannot count query that uses a HAVING clause. Use the output walkers for pagination"
@@ -171,8 +194,8 @@ class PaginationExtension implements QueryResultExtensionInterface
          * @see https://github.com/doctrine/doctrine2/blob/900b55d16afdcdeb5100d435a7166d3a425b9873/lib/Doctrine/ORM/Tools/Pagination/LimitSubqueryWalker.php#L149
          */
         if (
-            QueryChecker::hasMaxResults($queryBuilder)
-            && QueryChecker::hasOrderByOnToManyJoin($queryBuilder, $this->managerRegistry)
+            QueryChecker::hasMaxResults($queryBuilder) &&
+            QueryChecker::hasOrderByOnToManyJoin($queryBuilder, $this->managerRegistry)
         ) {
             return true;
         }

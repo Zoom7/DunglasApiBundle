@@ -13,9 +13,6 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryCollectionExtensionInterface;
-use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryItemExtensionInterface;
 
 /**
  * Eager loads relations.
@@ -28,17 +25,17 @@ final class EagerLoadingExtension implements QueryCollectionExtensionInterface, 
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder)
+    public function applyToCollection(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
-        $this->joinRelations($resourceClass, $queryBuilder);
+        $this->joinRelations($queryBuilder, $resourceClass);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function applyToItem(string $resourceClass, QueryBuilder $queryBuilder, array $id)
+    public function applyToItem(QueryBuilder $queryBuilder, string $resourceClass,  array $identifiers, string $operationName = null)
     {
-        $this->joinRelations($resourceClass, $queryBuilder);
+        $this->joinRelations($queryBuilder, $resourceClass);
     }
 
     /**
@@ -47,12 +44,13 @@ final class EagerLoadingExtension implements QueryCollectionExtensionInterface, 
      * @param string       $resourceClass
      * @param QueryBuilder $queryBuilder
      */
-    private function joinRelations(string $resourceClass, QueryBuilder $queryBuilder)
+    private function joinRelations(QueryBuilder $queryBuilder, string $resourceClass)
     {
         $classMetaData = $queryBuilder->getEntityManager()->getClassMetadata($resourceClass);
 
         foreach ($classMetaData->getAssociationNames() as $i => $association) {
             $mapping = $classMetaData->associationMappings[$association];
+
             if (ClassMetadataInfo::FETCH_EAGER === $mapping['fetch']) {
                 $queryBuilder->leftJoin('o.'.$association, 'a'.$i);
                 $queryBuilder->addSelect('a'.$i);

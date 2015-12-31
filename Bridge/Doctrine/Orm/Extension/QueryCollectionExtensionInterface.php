@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
 
@@ -17,12 +17,14 @@ use Doctrine\ORM\QueryBuilder;
  * Interface of Doctrine ORM query extensions for collection queries.
  *
  * @author Samuel ROZE <samuel.roze@gmail.com>
+ * @author Kévin Dunglas <dunglas@gmail.com>
  */
 interface QueryCollectionExtensionInterface
 {
     /**
-     * @param string       $resourceClass
      * @param QueryBuilder $queryBuilder
+     * @param string       $resourceClass
+     * @param string|null $operationName
      */
-    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder);
+    public function applyToCollection(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null);
 }

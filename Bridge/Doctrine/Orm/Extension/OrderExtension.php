@@ -12,8 +12,6 @@
 namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryCollectionExtensionInterface;
 
 /**
  * Applies selected ordering while querying resource collection.
@@ -28,10 +26,7 @@ class OrderExtension implements QueryCollectionExtensionInterface
      */
     private $order;
 
-    /**
-     * @param string|null $order
-     */
-    public function __construct($order = null)
+    public function __construct(string $order = null)
     {
         $this->order = $order;
     }
@@ -39,14 +34,15 @@ class OrderExtension implements QueryCollectionExtensionInterface
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder)
+    public function applyToCollection(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         $classMetaData = $queryBuilder->getEntityManager()->getClassMetadata($resourceClass);
         $identifiers = $classMetaData->getIdentifier();
 
-        if (null !== $this->order && 1 === count($identifiers)) {
-            $identifier = $identifiers[0];
-            $queryBuilder->addOrderBy('o.'.$identifier, $this->order);
+        if (null !== $this->order) {
+            foreach ($identifiers as $identifier) {
+                $queryBuilder->addOrderBy('o.' . $identifier, $this->order);
+            }
         }
     }
 }

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Model;
+namespace Dunglas\ApiBundle\Api;
 
 /**
  * Paginator Interface.

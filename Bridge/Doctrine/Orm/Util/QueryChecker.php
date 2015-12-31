@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm\Util;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Util;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
@@ -29,7 +29,7 @@ abstract class QueryChecker
      *
      * @return bool
      */
-    public static function hasHavingClause(QueryBuilder $queryBuilder)
+    public static function hasHavingClause(QueryBuilder $queryBuilder) : bool
     {
         return !empty($queryBuilder->getDQLPart('having'));
     }
@@ -42,7 +42,7 @@ abstract class QueryChecker
      *
      * @return bool
      */
-    public static function hasRootEntityWithForeignKeyIdentifier(QueryBuilder $queryBuilder, ManagerRegistry $managerRegistry)
+    public static function hasRootEntityWithForeignKeyIdentifier(QueryBuilder $queryBuilder, ManagerRegistry $managerRegistry) : bool
     {
         foreach ($queryBuilder->getRootEntities() as $rootEntity) {
             $rootMetadata = $managerRegistry
@@ -65,7 +65,7 @@ abstract class QueryChecker
      *
      * @return bool
      */
-    public static function hasMaxResults(QueryBuilder $queryBuilder)
+    public static function hasMaxResults(QueryBuilder $queryBuilder) : bool
     {
         return null !== $queryBuilder->getMaxResults();
     }
@@ -79,11 +79,11 @@ abstract class QueryChecker
      *
      * @return bool
      */
-    public static function hasOrderByOnToManyJoin(QueryBuilder $queryBuilder, ManagerRegistry $managerRegistry)
+    public static function hasOrderByOnToManyJoin(QueryBuilder $queryBuilder, ManagerRegistry $managerRegistry) : bool
     {
         if (
-            empty($orderByParts = $queryBuilder->getDQLPart('orderBy'))
-            || empty($joinParts = $queryBuilder->getDQLPart('join'))
+            empty($orderByParts = $queryBuilder->getDQLPart('orderBy')) ||
+            empty($joinParts = $queryBuilder->getDQLPart('join'))
         ) {
             return false;
         }

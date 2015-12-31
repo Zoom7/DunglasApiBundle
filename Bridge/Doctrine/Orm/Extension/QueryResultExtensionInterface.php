@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
 
@@ -18,15 +18,17 @@ use Doctrine\ORM\QueryBuilder;
  * for specific cases such as pagination.
  *
  * @author Samuel ROZE <samuel.roze@gmail.com>
+ * @author Kévin Dunglas <dunglas@gmail.com>
  */
 interface QueryResultExtensionInterface extends QueryCollectionExtensionInterface
 {
     /**
-     * @param string $resourceClass
+     * @param string      $resourceClass
+     * @param string|null $operationName
      *
      * @return bool
      */
-    public function supportsResult(string $resourceClass) : bool;
+    public function supportsResult(string $resourceClass, string $operationName = null) : bool;
 
     /**
      * @param QueryBuilder $queryBuilder

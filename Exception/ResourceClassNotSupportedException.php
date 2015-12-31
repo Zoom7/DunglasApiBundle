@@ -9,30 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Annotation;
+namespace Dunglas\ApiBundle\Exception;
 
 /**
- * Operation annotation.
+ * Resource class not supported exception.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
- *
- * @Annotation
- * @Target({"ANNOTATION"})
  */
-class Operation
+class ResourceClassNotSupportedException extends \Exception implements ExceptionInterface
 {
-    /**
-     * @var Pagination
-     */
-    public $pagination;
-
-    /**
-     * @var array
-     */
-    public $filters;
-
-    /**
-     * @var array
-     */
-    public $attributes;
 }
