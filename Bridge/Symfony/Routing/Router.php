@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Routing;
+namespace Dunglas\ApiBundle\Bridge\Symfony\Routing;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
@@ -20,7 +20,7 @@ use Symfony\Component\Routing\RouterInterface;
  *
  * Kévin Dunglas <dunglas@gmail.com>
  */
-class Router implements RouterInterface
+final class Router implements RouterInterface
 {
     /**
      * @var RouterInterface

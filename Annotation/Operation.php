@@ -9,13 +9,30 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Model;
+namespace Dunglas\ApiBundle\Annotation;
 
 /**
- * Pagination related features for data providers.
+ * Operation annotation.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
+ * @Annotation
+ * @Target({"ANNOTATION"})
  */
-trait PaginationTrait
+class Operation
 {
+    /**
+     * @var Pagination
+     */
+    public $pagination;
+
+    /**
+     * @var array
+     */
+    public $filters;
+
+    /**
+     * @var array
+     */
+    public $attributes;
 }

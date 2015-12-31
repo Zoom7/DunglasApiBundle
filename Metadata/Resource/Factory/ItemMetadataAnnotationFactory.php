@@ -15,6 +15,8 @@ use Doctrine\Common\Annotations\Reader;
 use Dunglas\ApiBundle\Annotation\Resource;
 use Dunglas\ApiBundle\Exception\ResourceClassNotFoundException;
 use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
+use Dunglas\ApiBundle\Metadata\Resource\Operation;
+use Dunglas\ApiBundle\Metadata\Resource\PaginationMetadata;
 
 /**
  * Parses Resource annotation and create an item metadata.
@@ -101,23 +103,72 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
 
         $itemMetadata = $parentItemMetadata;
         foreach (['shortName', 'description', 'iri', 'itemOperations', 'collectionOperations', 'attributes'] as $property) {
-            $this->createWith($itemMetadata, $property, $annotation->$property);
+            $itemMetadata = $this->createWith($itemMetadata, $property, $annotation->$property);
         }
+
+        $itemMetadata = $this->createWith($itemMetadata, 'collectionOperations', $this->createOperations($annotation->collectionOperations));
+        $itemMetadata = $this->createWith($itemMetadata, 'itemOperations', $this->createOperations($annotation->itemOperations));
 
         return $itemMetadata;
     }
 
-    private function createWith(ItemMetadata $itemMetadata, string $property, $value) : ItemMetadata
+    /**
+     * Creates operation and pagination metadata from annotations.
+     *
+     * @param array|null $operationAnnotations
+     *
+     * @return array|null
+     */
+    private function createOperations(array $operationAnnotations = null)
+    {
+        if (null === $operationAnnotations) {
+            return;
+        }
+
+        $operations = [];
+        foreach ($operationAnnotations as $operationName => $operationAnnotation) {
+            if ($paginationAnnotation = $operationAnnotation->pagination) {
+                $paginationMetadata = new PaginationMetadata(
+                    $paginationAnnotation->enabled,
+                    (float) $paginationAnnotation->itemsPerPage,
+                    $paginationAnnotation->clientControlEnabled
+                );
+            } else {
+                $paginationMetadata = null;
+            }
+
+            $operation = new Operation(
+                $operationAnnotation->filters,
+                $paginationMetadata,
+                $operationAnnotation->attributes
+            );
+
+            $operations[$operationName] = $operation;
+        }
+
+        return $operations;
+    }
+
+    /**
+     * Creates a new instance of metadata if the property is not already set.
+     *
+     * @param ItemMetadata $metadata
+     * @param string       $property
+     * @param mixed        $value
+     *
+     * @return ItemMetadata
+     */
+    private function createWith(ItemMetadata $metadata, string $property, $value) : ItemMetadata
     {
         $ucfirstedProperty = ucfirst($property);
         $getter = 'get'.$ucfirstedProperty;
 
-        if (null !== $itemMetadata->$getter()) {
-            return $itemMetadata;
+        if (null !== $metadata->$getter()) {
+            return $metadata;
         }
 
         $wither = 'with'.$ucfirstedProperty;
 
-        return $itemMetadata->$wither($value);
+        return $metadata->$wither($value);
     }
 }

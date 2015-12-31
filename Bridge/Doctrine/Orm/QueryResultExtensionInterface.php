@@ -9,10 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
 
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 
 /**
  * Interface of Doctrine ORM query extensions that supports result production
@@ -23,11 +22,11 @@ use Dunglas\ApiBundle\Api\ResourceInterface;
 interface QueryResultExtensionInterface extends QueryCollectionExtensionInterface
 {
     /**
-     * @param ResourceInterface $resource
+     * @param string $resourceClass
      *
      * @return bool
      */
-    public function supportsResult(ResourceInterface $resource);
+    public function supportsResult(string $resourceClass) : bool;
 
     /**
      * @param QueryBuilder $queryBuilder

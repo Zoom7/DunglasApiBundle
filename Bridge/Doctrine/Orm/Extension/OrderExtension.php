@@ -9,11 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm\Extension;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
 use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Doctrine\Orm\QueryCollectionExtensionInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryCollectionExtensionInterface;
 
 /**
  * Applies selected ordering while querying resource collection.
@@ -39,9 +39,9 @@ class OrderExtension implements QueryCollectionExtensionInterface
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder)
     {
-        $classMetaData = $queryBuilder->getEntityManager()->getClassMetadata($resource->getEntityClass());
+        $classMetaData = $queryBuilder->getEntityManager()->getClassMetadata($resourceClass);
         $identifiers = $classMetaData->getIdentifier();
 
         if (null !== $this->order && 1 === count($identifiers)) {

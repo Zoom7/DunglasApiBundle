@@ -289,7 +289,7 @@ final class ItemMetadata
      *
      * @return bool|null
      */
-    public function getIdentifier()
+    public function isIdentifier()
     {
         return $this->identifier;
     }
@@ -322,13 +322,15 @@ final class ItemMetadata
     /**
      * Returns a new instance with the given attribute.
      *
-     * @param string $key
-     * @param self   $value
+     * @param array $attributes
      *
      * @return self
      */
-    public function withAttribute(string $key, $value) : self
+    public function withAttributes(array $attributes) : self
     {
+        $metadata = clone $this;
+        $metadata->attributes = $attributes;
 
+        return $metadata;
     }
 }

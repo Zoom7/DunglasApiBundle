@@ -11,15 +11,12 @@
 
         <service id="api.property_info" alias="property_info" />
 
-        <service id="api.resource_type_registry" class="Dunglas\ApiBundle\Api\ResourceTypeRegistry" lazy="true" />
-
         <service id="api.data_provider" class="Dunglas\ApiBundle\Model\DataProviderChain" lazy="true" />
 
-        <service id="api.operation_factory" class="Dunglas\ApiBundle\Api\Operation\OperationFactory" public="false" />
-
-        <service id="api.route_loader" class="Dunglas\ApiBundle\Routing\ApiLoader" public="false">
-            <argument type="service" id="api.resource_collection" />
+        <service id="api.route_loader" class="Dunglas\ApiBundle\Bridge\Symfony\Routing\ApiLoader" public="false">
             <argument type="service" id="kernel" />
+            <argument type="service" id="api.metadata.resource.factory.collection" />
+            <argument type="service" id="api.metadata.resource.factory.item" />
 
             <tag name="routing.loader" />
         </service>
@@ -29,9 +26,9 @@
         </service>
 
         <service id="api.iri_converter" class="Dunglas\ApiBundle\Api\IriConverter" public="false">
-            <argument type="service" id="api.resource_collection" />
+            <argument type="service" id="api.metadata.property.factory.collection" />
+            <argument type="service" id="api.metadata.property.factory.item" />
             <argument type="service" id="api.data_provider" />
-            <argument type="service" id="api.mapping.class_metadata_factory" />
             <argument type="service" id="api.router" />
             <argument type="service" id="api.property_accessor" />
         </service>

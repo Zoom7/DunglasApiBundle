@@ -13,7 +13,9 @@ namespace Dunglas\ApiBundle\JsonLd\EventListener;
 
 use Dunglas\ApiBundle\JsonLd\Event\ContextBuilderEvent;
 use Dunglas\ApiBundle\JsonLd\Event\Events;
-use Dunglas\ApiBundle\Mapping\Factory\ClassMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface as PropertyCollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface as PropertyItemMetadataFactoryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
@@ -21,21 +23,35 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
  * Builds default context for JSON-LD resources.
  *
  * @author Luc Vieillescazes <luc@vieillescazes.net>
+ * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ResourceContextBuilderListener implements EventSubscriberInterface
+final class ResourceContextBuilderListener implements EventSubscriberInterface
 {
     /**
-     * @var ClassMetadataFactoryInterface
+     * @var ResourceItemMetadataFactoryInterface
      */
-    private $classMetadataFactory;
+    private $resourceItemMetadataFactory;
+
+    /**
+     * @var PropertyCollectionMetadataFactoryInterface
+     */
+    private $propertyCollectionMetadataFactory;
+
+    /**
+     * @var PropertyItemMetadataFactoryInterface
+     */
+    private $propertyItemMetadataFactory;
+
     /**
      * @var NameConverterInterface
      */
     private $nameConverter;
 
-    public function __construct(ClassMetadataFactoryInterface $classMetadataFactory, NameConverterInterface $nameConverter = null)
+    public function __construct(ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactoryInterface, NameConverterInterface $nameConverter = null)
     {
-        $this->classMetadataFactory = $classMetadataFactory;
+        $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
+        $this->propertyCollectionMetadataFactory = $propertyCollectionMetadataFactory;
+        $this->propertyItemMetadataFactory = $propertyItemMetadataFactoryInterface;
         $this->nameConverter = $nameConverter;
     }
 
@@ -53,35 +69,32 @@ class ResourceContextBuilderListener implements EventSubscriberInterface
      */
     public function onContextBuilder(ContextBuilderEvent $event)
     {
-        $resource = $event->getResource();
+        $resourceClass = $event->getResourceClass();
 
-        if (null === $resource) {
+        if (null === $resourceClass) {
             return;
         }
 
+        $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
         $context = $event->getContext();
 
-        $prefixedShortName = sprintf('#%s', $resource->getShortName());
+        $prefixedShortName = sprintf('#%s', $resourceItemMetadata->getShortName());
 
-        $classMetadata = $this->classMetadataFactory->getMetadataFor(
-            $resource->getEntityClass(),
-            $resource->getNormalizationGroups(),
-            $resource->getDenormalizationGroups(),
-            $resource->getValidationGroups()
-        );
+        ;
+        foreach ($this->propertyCollectionMetadataFactory->create($resourceClass) as $propertyName) {
+            $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
 
-        $identifierName = $classMetadata->getIdentifierName();
-        foreach ($classMetadata->getAttributesMetadata() as $attributeName => $attributeMetadata) {
-            if ($identifierName === $attributeName) {
+            if (!$propertyItemMetadata->isIdentifier()) {
                 continue;
             }
-            $convertedName = $this->nameConverter ? $this->nameConverter->normalize($attributeName) : $attributeName;
 
-            if (!$id = $attributeMetadata->getIri()) {
+            $convertedName = $this->nameConverter ? $this->nameConverter->normalize($propertyName) : $propertyName;
+
+            if (!$id = $propertyItemMetadata->getIri()) {
                 $id = sprintf('%s/%s', $prefixedShortName, $convertedName);
             }
 
-            if ($attributeMetadata->isNormalizationLink()) {
+            if ($propertyItemMetadata->isReadableLink()) {
                 $context[$convertedName] = [
                     '@id' => $id,
                     '@type' => '@id',

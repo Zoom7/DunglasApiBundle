@@ -27,11 +27,11 @@ interface IriConverterInterface
      * @param string $iri
      * @param bool   $fetchData
      *
-     * @return object|null
+     * @return object
      *
      * @throws InvalidArgumentException
      */
-    public function getItemFromIri($iri, $fetchData = false);
+    public function getItemFromIri(string $iri, bool $fetchData = false);
 
     /**
      * Gets the IRI associated with the given item.
@@ -43,17 +43,17 @@ interface IriConverterInterface
      *
      * @throws InvalidArgumentException
      */
-    public function getIriFromItem($item, $referenceType = RouterInterface::ABSOLUTE_PATH);
+    public function getIriFromItem($item, bool $referenceType = RouterInterface::ABSOLUTE_PATH) : string;
 
     /**
      * Gets the IRI associated with the given resource collection.
      *
-     * @param ResourceInterface $resource
-     * @param bool              $referenceType
+     * @param string $resourceClass
+     * @param bool   $referenceType
      *
      * @return string
      *
      * @throws InvalidArgumentException
      */
-    public function getIriFromResource(ResourceInterface $resource, $referenceType = RouterInterface::ABSOLUTE_PATH);
+    public function getIriFromResource(string $resourceClass, bool $referenceType = RouterInterface::ABSOLUTE_PATH) : string;
 }

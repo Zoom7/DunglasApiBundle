@@ -12,6 +12,7 @@
 namespace Dunglas\ApiBundle\JsonLd\EventListener;
 
 use Dunglas\ApiBundle\JsonLd\Response as JsonLdResponse;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
@@ -22,7 +23,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ResponderViewListener
+final class ResponderViewListener
 {
     const FORMAT = 'jsonld';
 
@@ -31,9 +32,15 @@ class ResponderViewListener
      */
     private $normalizer;
 
-    public function __construct(NormalizerInterface $normalizer)
+    /**
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
+    public function __construct(NormalizerInterface $normalizer, ItemMetadataFactoryInterface $itemMetadataFactory)
     {
         $this->normalizer = $normalizer;
+        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -72,11 +79,32 @@ class ResponderViewListener
                 break;
         }
 
-        $resourceType = $request->attributes->get('_resource_type');
+        $resourceClass = $request->attributes->get('_resource_class');
+        $collectionOperationName = $request->attributes->get('_collection_operation_name');
+        $itemOperationName = $request->attributes->get('_item_operation_name');
+
+        if (!$resourceClass || (!$collectionOperationName && !$itemOperationName)) {
+            $event->setResponse(new JsonLdResponse($controllerResult, $status));
+
+            return;
+        }
+
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+
+        if ($collectionOperationName) {
+            $context = $itemMetadata->getCollectionOperationAttribute($collectionOperationName, 'normalization_context');
+        } else {
+            $context = $itemMetadata->getItemOperationAttribute($itemOperationName, 'normalization_context');
+        }
+
+        if (!isset($context)) {
+            $context = isset($itemMetadata->getAttributes()['normalization_context']) ? $itemMetadata->getAttributes()['normalization_context'] : [];
+        }
+
         $response = new JsonLdResponse(
-            $resourceType ? $this->normalizer->normalize(
-                $controllerResult, self::FORMAT, $resourceType->getNormalizationContext() + ['request_uri' => $request->getRequestUri()]
-            ) : $controllerResult,
+            $this->normalizer->normalize(
+                $controllerResult, self::FORMAT, $context + ['request_uri' => $request->getRequestUri()]
+            ),
             $status
         );
 

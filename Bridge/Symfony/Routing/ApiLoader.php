@@ -12,11 +12,11 @@
 namespace Dunglas\ApiBundle\Bridge\Symfony\Routing;
 
 use Doctrine\Common\Inflector\Inflector;
-use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Exception\RuntimeException;
-use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
-use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface;
-use Dunglas\ApiBundle\Routing\ResourceCollectionInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface as PropertyItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface as ResourceCollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Operation;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -29,31 +29,37 @@ use Symfony\Component\Routing\RouteCollection;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ApiLoader extends Loader
+final class ApiLoader extends Loader
 {
     const ROUTE_NAME_PREFIX = 'api_';
     const DEFAULT_ACTION_PATTERN = 'api.action.';
-
-    /**
-     * @var CollectionMetadataFactoryInterface
-     */
-    private $collectionMetadataFactory;
-
-    /**
-     * @var ItemMetadataFactoryInterface
-     */
-    private $itemMetadataFactory;
 
     /**
      * @var XmlFileLoader
      */
     private $fileLoader;
 
-    public function __construct(KernelInterface $kernel, CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory)
+    /**
+     * @var ResourceCollectionMetadataFactoryInterface
+     */
+    private $resourceCollectionMetadataFactory;
+
+    /**
+     * @var ResourceItemMetadataFactoryInterface
+     */
+    private $resourceItemMetadataFactory;
+
+    /**
+     * @var PropertyItemMetadataFactoryInterface
+     */
+    private $propertyItemMetadataFactory;
+
+    public function __construct(KernelInterface $kernel, ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory)
     {
         $this->fileLoader = new XmlFileLoader(new FileLocator($kernel->locateResource('@DunglasApiBundle/Resources/config/routing')));
-        $this->collectionMetadataFactory = $collectionMetadataFactory;
-        $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->resourceCollectionMetadataFactory = $resourceCollectionMetadataFactory;
+        $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
+        $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
     }
 
     /**
@@ -66,17 +72,16 @@ class ApiLoader extends Loader
         $routeCollection->addCollection($this->fileLoader->load('jsonld.xml'));
         $routeCollection->addCollection($this->fileLoader->load('hydra.xml'));
 
-        foreach ($this->collectionMetadataFactory->create() as $resourceClass) {
-            foreach ($this->itemMetadataFactory->create($resourceClass) as $itemMetadata) {
-                $normalizedShortName = Inflector::pluralize(Inflector::tableize($itemMetadata->getShortName()));
+        foreach ($this->resourceCollectionMetadataFactory->create() as $resourceClass) {
+            $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
+            $normalizedShortName = Inflector::pluralize(Inflector::tableize($itemMetadata->getShortName()));
 
-                foreach ($itemMetadata->getCollectionOperations() as $operationName => $operation) {
-                    $this->addRoute($routeCollection, $resourceClass, $operationName, $operation, $normalizedShortName, true);
-                }
+            foreach ($itemMetadata->getCollectionOperations() as $operationName => $operation) {
+                $this->addRoute($routeCollection, $resourceClass, $operationName, $operation, $normalizedShortName, true);
+            }
 
-                foreach ($itemMetadata->getItemOperations() as $operationName => $operation) {
-                    $this->addRoute($routeCollection, $resourceClass, $operationName, $operation, $normalizedShortName, false);
-                }
+            foreach ($itemMetadata->getItemOperations() as $operationName => $operation) {
+                $this->addRoute($routeCollection, $resourceClass, $operationName, $operation, $normalizedShortName, false);
             }
         }
 
@@ -97,28 +102,30 @@ class ApiLoader extends Loader
      * @param RouteCollection $routeCollection
      * @param string          $resourceClass
      * @param string          $operationName
-     * @param array           $operation
+     * @param Operation       $operation
      * @param string          $normalizedShortName
      * @param bool            $collection
      *
      * @throws RuntimeException
      */
-    private function addRoute(RouteCollection $routeCollection, string $resourceClass, string $operationName, array $operation, string $normalizedShortName, bool $collection)
+    private function addRoute(RouteCollection $routeCollection, string $resourceClass, string $operationName, Operation $operation, string $normalizedShortName, bool $collection)
     {
-        if (isset($collectionOperation['route_name'])) {
+        $attributes = $operation->getAttributes();
+
+        if (isset($attributes['route_name'])) {
             return;
         }
 
-        if (!isset($collectionOperation['method'])) {
-            throw new RuntimeException('Either a "route_name" or a "method" key must exist.');
+        if (!isset($attributes['method'])) {
+            throw new RuntimeException('Either a "route_name" or a "method" operation attribute must exist.');
         }
 
-        if (isset($collectionOperation['controller'])) {
-            $actionName = sprintf('%s_%s', strtolower($collectionOperation['method']), $collection ? 'collection' : 'item');
+        if (isset($attributes['controller'])) {
+            $actionName = sprintf('%s_%s', strtolower($attributes['method']), $collection ? 'collection' : 'item');
 
             $controller = self::DEFAULT_ACTION_PATTERN.$actionName;
         } else {
-            $controller = $collectionOperation['controller'];
+            $controller = $attributes['controller'];
         }
 
         $path = '/'.$normalizedShortName;
@@ -133,13 +140,13 @@ class ApiLoader extends Loader
             [
                 '_controller' => $controller,
                 '_resource_class' => $resourceClass,
-                sprintf('_%s_operation', $collection ? 'collection' : 'item') => $operationName,
+                sprintf('_%s_operation_name', $collection ? 'collection' : 'item') => $operationName,
             ],
             [],
             [],
             '',
             [],
-            [ $collectionOperation['method'] ]
+            [ $attributes['method'] ]
         );
 
         $routeCollection->add($routeName, $route);

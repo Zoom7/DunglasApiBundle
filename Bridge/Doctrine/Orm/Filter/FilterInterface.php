@@ -12,7 +12,7 @@
 namespace Dunglas\ApiBundle\Doctrine\Orm\Filter;
 
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\Filter\FilterInterface as BaseFilterInterface;
+use Dunglas\ApiBundle\Api\FilterInterface as BaseFilterInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 
 /**

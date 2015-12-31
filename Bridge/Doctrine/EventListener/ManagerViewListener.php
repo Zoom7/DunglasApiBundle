@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\EventListener;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\EventListener;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ManagerViewListener
+final class ManagerViewListener
 {
     /**
      * @var ManagerRegistry

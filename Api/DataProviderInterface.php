@@ -9,9 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Model;
+namespace Dunglas\ApiBundle\Api;
 
 use Dunglas\ApiBundle\Api\ResourceInterface;
+use Dunglas\ApiBundle\Model\bool;
+use Dunglas\ApiBundle\Model\PaginatorInterface;
+use Dunglas\ApiBundle\Model\string;
 
 /**
  * Data provider interface.
@@ -23,29 +26,22 @@ interface DataProviderInterface
     /**
      * Retrieves an item.
      *
-     * @param ResourceInterface $resource
-     * @param int|string        $id
-     * @param bool              $fetchData
+     * @param string      $resourceClass
+     * @param string|null $operationName
+     * @param int|string  $id
+     * @param bool        $fetchData
      *
      * @return object|null
      */
-    public function getItem(ResourceInterface $resource, $id, $fetchData = false);
+    public function getItem(string $resourceClass, $id, string $operationName = null, bool $fetchData = false);
 
     /**
      * Retrieves a collection.
      *
-     * @param ResourceInterface $resource
+     * @param string      $resourceClass
+     * @param string|null $operationName
      *
      * @return array|PaginatorInterface|\Traversable
      */
-    public function getCollection(ResourceInterface $resource);
-
-    /**
-     * Does this DataProvider supports the given resource.
-     *
-     * @param ResourceInterface $resource
-     *
-     * @return bool
-     */
-    public function supports(ResourceInterface $resource);
+    public function getCollection(string $resourceClass, string $operation = null);
 }

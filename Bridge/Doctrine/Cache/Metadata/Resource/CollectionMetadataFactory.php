@@ -20,7 +20,7 @@ use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterfa
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class CollectionMetadataFactory implements CollectionMetadataFactoryInterface
+final class CollectionMetadataFactory implements CollectionMetadataFactoryInterface
 {
     const KEY = 'rc';
 

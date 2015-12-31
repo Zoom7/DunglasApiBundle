@@ -14,6 +14,7 @@ namespace Dunglas\ApiBundle\JsonLd;
 use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\JsonLd\Event\ContextBuilderEvent;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -34,23 +35,19 @@ class ContextBuilder
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var EventDispatcherInterface
      */
     private $eventDispatcher;
-    /**
-     * @var ResourceCollectionInterface
-     */
-    private $resourceCollection;
 
-    public function __construct(
-        RouterInterface $router,
-        EventDispatcherInterface $eventDispatcher,
-        ResourceTypeRegistryInterface $resourceCollection
-    ) {
+    private $itemMetadataFactory;
+
+    public function __construct(RouterInterface $router, EventDispatcherInterface $eventDispatcher, ItemMetadataFactoryInterface $itemMetadataFactory)
+    {
         $this->router = $router;
         $this->eventDispatcher = $eventDispatcher;
-        $this->resourceCollection = $resourceCollection;
+        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -58,7 +55,7 @@ class ContextBuilder
      *
      * @return array
      */
-    public function getEntrypointContext()
+    public function getEntrypointContext() : array
     {
         $context = $this->getBaseContext();
 
@@ -75,13 +72,16 @@ class ContextBuilder
     }
 
     /**
-     * @param ResourceInterface $resource
-     * @param array             $normalizationContext
+     * @param string $resourceClass
+     * @param array  $normalizationContext
      *
      * @return array|string
      */
-    public function getResourceContext(ResourceInterface $resource, array $normalizationContext)
+    public function getResourceContext(string $resourceClass, array $normalizationContext)
     {
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+        // TODO
+
         if (isset($normalizationContext['jsonld_context_embedded'])) {
             return $this->getContext($resource);
         }
@@ -92,14 +92,14 @@ class ContextBuilder
     /**
      * Builds the JSON-LD context for the given resource.
      *
-     * @param ResourceInterface|null $resource
+     * @param string|null $resourceClass
      *
      * @return array
      */
-    public function getContext(ResourceInterface $resource = null)
+    public function getContext(string $resourceClass = null) : array
     {
         $context = $this->getBaseContext();
-        $event = new ContextBuilderEvent($context, $resource);
+        $event = new ContextBuilderEvent($context, $resourceClass);
         $this->eventDispatcher->dispatch(Event\Events::CONTEXT_BUILDER, $event);
 
         return $event->getContext();
@@ -112,7 +112,7 @@ class ContextBuilder
      *
      * @return string
      */
-    public function getContextUri(ResourceInterface $resource)
+    public function getContextUri(string $resourceClass)
     {
         return $this->router->generate('api_jsonld_context', ['shortName' => $resource->getShortName()]);
     }

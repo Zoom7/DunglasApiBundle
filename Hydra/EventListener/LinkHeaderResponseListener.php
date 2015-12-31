@@ -21,7 +21,7 @@ use Symfony\Component\Routing\RouterInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class LinkHeaderResponseListener
+final class LinkHeaderResponseListener
 {
     /**
      * @var RouterInterface

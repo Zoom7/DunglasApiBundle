@@ -20,7 +20,7 @@ use Dunglas\ApiBundle\Metadata\Property\ItemMetadata;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ItemMetadataFactory implements ItemMetadataFactoryInterface
+final class ItemMetadataFactory implements ItemMetadataFactoryInterface
 {
     /**
      * @var ItemMetadataFactoryInterface
@@ -45,7 +45,7 @@ class ItemMetadataFactory implements ItemMetadataFactoryInterface
     {
         $itemMetadata = $this->decorated->create($resourceClass, $property, $options);
 
-        if (null !== $itemMetadata->getIdentifier()) {
+        if (null !== $itemMetadata->isIdentifier()) {
             return $itemMetadata;
         }
 
@@ -73,7 +73,7 @@ class ItemMetadataFactory implements ItemMetadataFactoryInterface
             }
         }
 
-        if (null === $itemMetadata->getIdentifier()) {
+        if (null === $itemMetadata->isIdentifier()) {
             $itemMetadata = $itemMetadata->withIdentifier(false);
         }
 

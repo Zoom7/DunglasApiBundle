@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
-use Dunglas\ApiBundle\Api\Filter\FilterInterface;
+use Dunglas\ApiBundle\Api\FilterInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Api\ResourceResolver;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;

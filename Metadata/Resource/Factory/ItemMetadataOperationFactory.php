@@ -12,6 +12,7 @@
 namespace Dunglas\ApiBundle\Metadata\Resource\Factory;
 
 use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
+use Dunglas\ApiBundle\Metadata\Resource\Operation;
 
 /**
  * Creates or completes operations.
@@ -40,23 +41,27 @@ class ItemMetadataOperationFactory implements ItemMetadataFactoryInterface
         $isAbstract = $reflectionClass->isAbstract();
 
         if (null === $itemMetadata->getCollectionOperations()) {
-            $operations = [];
-            foreach ($isAbstract ? ['GET'] : ['GET', 'POST'] as $method) {
-                $operations[strtolower($method)]['method'] = $method;
-            }
-
-            $itemMetadata = $itemMetadata->withItemOperations($operations);
+            $itemMetadata = $itemMetadata->withCollectionOperations($this->createOperations(
+                $isAbstract ? ['GET'] : ['GET', 'POST']
+            ));
         }
 
         if (null === $itemMetadata->getItemOperations()) {
-            $operations = [];
-            foreach ($isAbstract ? ['GET', 'DELETE'] : ['GET', 'PUT', 'DELETE'] as $method) {
-                $operations[strtolower($method)]['method'] = $method;
-            }
-
-            $itemMetadata = $itemMetadata->withItemOperations($operations);
+            $itemMetadata = $itemMetadata->withItemOperations($this->createOperations(
+                $isAbstract ? ['GET', 'DELETE'] : ['GET', 'PUT', 'DELETE']
+            ));
         }
 
         return $itemMetadata;
+    }
+
+    private function createOperations(array $methods) : array
+    {
+        $operations = [];
+        foreach ($methods as $method) {
+            $operations[strtolower($method)] = new Operation(null, null, ['method' => $method]);
+        }
+
+        return $operations;
     }
 }

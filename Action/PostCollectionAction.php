@@ -12,6 +12,7 @@
 namespace Dunglas\ApiBundle\Action;
 
 use Dunglas\ApiBundle\Exception\RuntimeException;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -20,7 +21,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class PostCollectionAction
+final class PostCollectionAction
 {
     use ActionUtilTrait;
 
@@ -29,9 +30,15 @@ class PostCollectionAction
      */
     private $serializer;
 
-    public function __construct(SerializerInterface $serializer)
+    /**
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
+    public function __construct(SerializerInterface $serializer, ItemMetadataFactoryInterface $itemMetadataFactory)
     {
         $this->serializer = $serializer;
+        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -45,13 +52,14 @@ class PostCollectionAction
      */
     public function __invoke(Request $request)
     {
-        list($resourceType, $format) = $this->extractAttributes($request);
+        list($resourceClass, $operationName, , $format) = $this->extractAttributes($request);
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
 
         return $this->serializer->deserialize(
             $request->getContent(),
-            $resourceType->getEntityClass(),
+            $resourceClass,
             $format,
-            $resourceType->getDenormalizationContext()
+            $itemMetadata->getCollectionOperationAttribute($operationName, 'denormalization_context', [], true)
         );
     }
 }

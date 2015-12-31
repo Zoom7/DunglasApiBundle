@@ -12,7 +12,8 @@
 namespace Dunglas\ApiBundle\Action;
 
 use Dunglas\ApiBundle\Exception\RuntimeException;
-use Dunglas\ApiBundle\Model\DataProviderInterface;
+use Dunglas\ApiBundle\Api\DataProviderInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -22,7 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class PutItemAction
+final class PutItemAction
 {
     use ActionUtilTrait;
 
@@ -30,15 +31,22 @@ class PutItemAction
      * @var DataProviderInterface
      */
     private $dataProvider;
+
     /**
      * @var SerializerInterface
      */
     private $serializer;
 
-    public function __construct(DataProviderInterface $dataProvider, SerializerInterface $serializer)
+    /**
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
+    public function __construct(DataProviderInterface $dataProvider, SerializerInterface $serializer, ItemMetadataFactoryInterface $itemMetadataFactory)
     {
         $this->dataProvider = $dataProvider;
         $this->serializer = $serializer;
+        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -54,17 +62,17 @@ class PutItemAction
      */
     public function __invoke(Request $request, $id)
     {
-        list($resourceType, $format) = $this->extractAttributes($request);
-        $data = $this->getItem($this->dataProvider, $resourceType, $id);
+        list($resourceClass, , $operationName, $format) = $this->extractAttributes($request);
+        $data = $this->getItem($this->dataProvider, $resourceClass, $id, $operationName);
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
 
-        $context = $resourceType->getDenormalizationContext();
-        $context['object_to_populate'] = $data;
+        $context = $itemMetadata->getItemOperationAttribute($operationName, 'denormalization_context', [], true);
 
         $data = $this->serializer->deserialize(
             $request->getContent(),
-            $resourceType->getEntityClass(),
+            $resourceClass,
             $format,
-            $context
+            $context + ['object_to_populate' => $data]
         );
 
         return $data;

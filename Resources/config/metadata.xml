@@ -47,7 +47,7 @@
         -->
 
         <service id="api.metadata.property.factory.collection.property_info" class="Dunglas\ApiBundle\Bridge\Symfony\PropertyInfo\Metadata\Property\CollectionMetadataFactory" public="false">
-            <argument type="service" id="property_info" />
+            <argument type="service" id="api.property_info" />
         </service>
 
         <!-- Property metadata loader -->
@@ -59,7 +59,7 @@
         </service>
 
         <service id="api.metadata.property.factory.item.property_info" class="Dunglas\ApiBundle\Bridge\Symfony\PropertyInfo\Metadata\Property\ItemMetadataFactory" decorates="api.metadata.property.factory.item" public="false">
-            <argument type="service" id="property_info" />
+            <argument type="service" id="api.property_info" />
             <argument type="service" id="api.metadata.property.factory.item.property_info.inner" />
         </service>
 

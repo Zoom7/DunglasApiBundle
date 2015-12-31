@@ -20,7 +20,7 @@ use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ItemMetadataFactory implements ItemMetadataFactoryInterface
+final class ItemMetadataFactory implements ItemMetadataFactoryInterface
 {
     const KEY_PATTERN = 'r_%s';
 

@@ -181,6 +181,62 @@ final class ItemMetadata
         return $metadata;
     }
 
+
+
+    /**
+     * Gets a collection operation attribute, optionally fallback to a resource attribute.
+     *
+     * @param string $operationName
+     * @param string $key
+     * @param mixed  $defaultValue
+     * @param bool   $resourceFallback
+     *
+     * @return mixed
+     */
+    public function getCollectionOperationAttribute(string $operationName, string $key, $defaultValue = null, bool $resourceFallback = false)
+    {
+        return $this->getOperationAttribute($this->collectionOperations, $operationName, $key, $defaultValue, $resourceFallback);
+    }
+
+    /**
+     * Gets an item operation attribute, optionally fallback to a resource attribute.
+     *
+     * @param string $operationName
+     * @param string $key
+     * @param mixed  $defaultValue
+     * @param bool   $resourceFallback
+     *
+     * @return mixed
+     */
+    public function getItemOperationAttribute(string $operationName, string $key, $defaultValue = null, bool $resourceFallback = false)
+    {
+        return $this->getOperationAttribute($this->itemOperations, $operationName , $key, $defaultValue, $resourceFallback);
+    }
+
+    /**
+     * Gets an operation attribute, optionally fallback to a resource attribute.
+     *
+     * @param array  $operations
+     * @param string $operationName
+     * @param string $key
+     * @param mixed  $defaultValue
+     * @param bool   $resourceFallback
+     *
+     * @return mixed
+     */
+    private function getOperationAttribute(array $operations, string $operationName, string $key, $defaultValue = null, bool $resourceFallback = false)
+    {
+        if (isset($operations[$operationName]->getAttributes()[$key])) {
+            return isset($operations[$operationName]->getAttributes()[$key]);
+        }
+
+        if ($resourceFallback && isset($this->attributes[$key])) {
+            return $this->attributes[$key];
+        }
+
+        return $defaultValue;
+    }
+
     /**
      * Gets attributes.
      *
@@ -194,15 +250,14 @@ final class ItemMetadata
     /**
      * Returns a new instance with the given attribute.
      *
-     * @param string $key
-     * @param mixed  $value
+     * @param array $attributes
      *
      * @return self
      */
-    public function withAttribute(string $key, $value) : self
+    public function withAttributes(array $attributes) : self
     {
         $metadata = clone $this;
-        $metadata->attributes[$key] = $value;
+        $metadata->attributes = $attributes;
 
         return $metadata;
     }

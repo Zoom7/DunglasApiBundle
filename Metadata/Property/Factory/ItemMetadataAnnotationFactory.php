@@ -127,7 +127,7 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
         }
 
         $itemMetadata = $parentItemMetadata;
-        foreach (['description', 'readable', 'writable', 'readableLink', 'writableLink', 'required', 'iri', 'identifier'] as $property) {
+        foreach (['description', 'readable', 'writable', 'readableLink', 'writableLink', 'required', 'iri', 'identifier', 'attributes'] as $property) {
             $this->createWith($itemMetadata, $property, $annotation->$property);
         }
 

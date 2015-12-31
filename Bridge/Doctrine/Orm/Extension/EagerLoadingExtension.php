@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm\Extension;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Doctrine\Orm\QueryCollectionExtensionInterface;
-use Dunglas\ApiBundle\Doctrine\Orm\QueryItemExtensionInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryCollectionExtensionInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryItemExtensionInterface;
 
 /**
  * Eager loads relations.
@@ -23,33 +23,33 @@ use Dunglas\ApiBundle\Doctrine\Orm\QueryItemExtensionInterface;
  * @author Charles Sarrazin <charles@sarraz.in>
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class EagerLoadingExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
+final class EagerLoadingExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder)
     {
-        $this->joinRelations($resource, $queryBuilder);
+        $this->joinRelations($resourceClass, $queryBuilder);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function applyToItem(ResourceInterface $resource, QueryBuilder $queryBuilder, $id)
+    public function applyToItem(string $resourceClass, QueryBuilder $queryBuilder, array $id)
     {
-        $this->joinRelations($resource, $queryBuilder);
+        $this->joinRelations($resourceClass, $queryBuilder);
     }
 
     /**
      * Left joins relations to eager load.
      *
-     * @param ResourceInterface $resource
-     * @param QueryBuilder      $queryBuilder
+     * @param string       $resourceClass
+     * @param QueryBuilder $queryBuilder
      */
-    private function joinRelations(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    private function joinRelations(string $resourceClass, QueryBuilder $queryBuilder)
     {
-        $classMetaData = $queryBuilder->getEntityManager()->getClassMetadata($resource->getEntityClass());
+        $classMetaData = $queryBuilder->getEntityManager()->getClassMetadata($resourceClass);
 
         foreach ($classMetaData->getAssociationNames() as $i => $association) {
             $mapping = $classMetaData->associationMappings[$association];

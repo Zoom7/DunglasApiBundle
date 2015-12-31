@@ -9,9 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Api\Filter;
-
-use Dunglas\ApiBundle\Api\ResourceInterface;
+namespace Dunglas\ApiBundle\Api;
 
 /**
  * Filters applicable on a resource.
@@ -30,9 +28,9 @@ interface FilterInterface
      *   - strategy: the used strategy
      * The description can contain additional data specific to a filter.
      *
-     * @param ResourceInterface $resource
+     * @param string $resourceClass
      *
      * @return array
      */
-    public function getDescription(ResourceInterface $resource);
+    public function getDescription(string $resourceClass) : string;
 }

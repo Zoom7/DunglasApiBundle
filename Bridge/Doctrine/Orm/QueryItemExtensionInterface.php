@@ -9,10 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
 
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 
 /**
  * Interface of Doctrine ORM query extensions for item queries.
@@ -22,9 +21,9 @@ use Dunglas\ApiBundle\Api\ResourceInterface;
 interface QueryItemExtensionInterface
 {
     /**
-     * @param ResourceInterface $resource
-     * @param QueryBuilder      $queryBuilder
-     * @param int               $id
+     * @param string       $resourceClass
+     * @param QueryBuilder $queryBuilder
+     * @param array        $id
      */
-    public function applyToItem(ResourceInterface $resource, QueryBuilder $queryBuilder, $id);
+    public function applyToItem(string $resourceClass, QueryBuilder $queryBuilder, array $identifiers);
 }

@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm\Extension;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineOrmPaginator;
 use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Doctrine\Orm\Paginator;
-use Dunglas\ApiBundle\Doctrine\Orm\QueryResultExtensionInterface;
-use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryChecker;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Paginator;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\QueryResultExtensionInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Util\QueryChecker;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -52,30 +52,28 @@ class PaginationExtension implements QueryResultExtensionInterface
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function applyToCollection(string $resourceClass, QueryBuilder $queryBuilder)
     {
         $request = $this->requestStack->getCurrentRequest();
-        if (null === $request || !$this->isPaginationEnabled($resource, $request)) {
+        if (null === $request || !$this->isPaginationEnabled($resourceClass, $request)) {
             return;
         }
 
-        $itemsPerPage = $this->getItemsPerPage($resource, $request);
+        $itemsPerPage = $this->getItemsPerPage($resourceClass, $request);
 
         $queryBuilder
-            ->setFirstResult(($this->getPage($resource, $request) - 1) * $itemsPerPage)
+            ->setFirstResult(($this->getPage($resourceClass, $request) - 1) * $itemsPerPage)
             ->setMaxResults($itemsPerPage);
     }
 
     /**
-     * @param ResourceInterface $resource
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    public function supportsResult(ResourceInterface $resource)
+    public function supportsResult(string $resourceClass) : bool
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        return $request !== null && $this->isPaginationEnabled($resource, $request);
+        return $request !== null && $this->isPaginationEnabled($resourceClass, $request);
     }
 
     /**
@@ -84,7 +82,6 @@ class PaginationExtension implements QueryResultExtensionInterface
     public function getResult(QueryBuilder $queryBuilder)
     {
         $doctrineOrmPaginator = new DoctrineOrmPaginator($queryBuilder);
-
         $doctrineOrmPaginator->setUseOutputWalkers($this->useOutputWalkers($queryBuilder));
 
         return new Paginator($doctrineOrmPaginator);
@@ -93,12 +90,12 @@ class PaginationExtension implements QueryResultExtensionInterface
     /**
      * Checks if the pagination is enabled or not.
      *
-     * @param ResourceInterface $resource
-     * @param Request           $request
+     * @param string  $resourceClass
+     * @param Request $request
      *
      * @return bool
      */
-    private function isPaginationEnabled(ResourceInterface $resource, Request $request)
+    private function isPaginationEnabled(string $resourceClass, Request $request) : bool
     {
         $clientPagination = $request->get($resource->getEnablePaginationParameter());
 

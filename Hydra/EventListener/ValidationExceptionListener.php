@@ -21,7 +21,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ValidationExceptionListener
+final class ValidationExceptionListener
 {
     /**
      * @var NormalizerInterface

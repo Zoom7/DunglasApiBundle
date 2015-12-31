@@ -23,26 +23,26 @@ interface PaginatorInterface extends \Traversable, \Countable
      *
      * @return float
      */
-    public function getCurrentPage();
+    public function getCurrentPage() : float;
 
     /**
      * Gets last page.
      *
      * @return float
      */
-    public function getLastPage();
+    public function getLastPage() : float;
 
     /**
      * Gets the number of items by page.
      *
-     * @return int
+     * @return float
      */
-    public function getItemsPerPage();
+    public function getItemsPerPage() : float;
 
     /**
      * Gets the number of items in the whole collection.
      *
      * @return float
      */
-    public function getTotalItems();
+    public function getTotalItems() : float;
 }

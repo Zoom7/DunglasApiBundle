@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class FormatRequestListener
+final class FormatRequestListener
 {
     /**
      * @var FormatNegotiatorInterface

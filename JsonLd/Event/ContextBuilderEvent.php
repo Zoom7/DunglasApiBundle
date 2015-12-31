@@ -26,40 +26,38 @@ class ContextBuilderEvent extends Event
      */
     private $context;
     /**
-     * @var ResourceInterface
+     * @var string|null
      */
-    private $resource;
+    private $resourceClass;
 
     /**
      * @param array             $context
-     * @param ResourceInterface $resource
+     * @param string            $resourceClass
      */
-    public function __construct(array $context, ResourceInterface $resource = null)
+    public function __construct(array $context, string $resourceClass = null)
     {
         $this->context = $context;
-        $this->resource = $resource;
+        $this->resourceClass = $resourceClass;
     }
 
     /**
-     * @return ResourceInterface|null
+     * @return string|null
      */
-    public function getResource()
+    public function getResourceClass()
     {
-        return $this->resource;
+        return $this->resourceClass;
     }
 
     /**
      * @return array
      */
-    public function getContext()
+    public function getContext() : array
     {
         return $this->context;
     }
 
     /**
      * @param array $context
-     *
-     * @return array
      */
     public function setContext(array $context)
     {
@@ -72,7 +70,7 @@ class ContextBuilderEvent extends Event
      *
      * @return ContextBuilderEvent
      */
-    public function addToContext($key, $value)
+    public function addToContext(string $key, $value) : self
     {
         $this->context[$key] = $value;
 

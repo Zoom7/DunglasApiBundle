@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\FosUser;
+namespace Dunglas\ApiBundle\Bridge\FosUser;
 
 use FOS\UserBundle\Model\UserManagerInterface;
 use FOS\UserBundle\Model\UserInterface;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
  * @author Kévin Dunglas <dunglas@gmail.com>
  * @author Théo FIDRY <theo.fidry@gmail.com>
  */
-class EventListener
+final class EventListener
 {
     /**
      * @var UserManagerInterface

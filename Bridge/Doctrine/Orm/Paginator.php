@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
 
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineOrmPaginator;
+use Doctrine\ORM\Query;
 use Dunglas\ApiBundle\Model\PaginatorInterface;
 
 /**
@@ -19,24 +20,28 @@ use Dunglas\ApiBundle\Model\PaginatorInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Paginator implements \IteratorAggregate, PaginatorInterface
+final class Paginator implements \IteratorAggregate, PaginatorInterface
 {
     /**
      * @var DoctrineOrmPaginator
      */
     private $paginator;
+
     /**
-     * @var \Doctrine\ORM\Query
+     * @var Query
      */
     private $query;
+
     /**
      * @var int
      */
     private $firstResult;
+
     /**
      * @var int
      */
     private $maxResults;
+
     /**
      * @var int
      */
@@ -59,7 +64,7 @@ class Paginator implements \IteratorAggregate, PaginatorInterface
     /**
      * {@inheritdoc}
      */
-    public function getCurrentPage()
+    public function getCurrentPage() : float
     {
         return floor($this->firstResult / $this->maxResults) + 1.;
     }
@@ -67,7 +72,7 @@ class Paginator implements \IteratorAggregate, PaginatorInterface
     /**
      * {@inheritdoc}
      */
-    public function getLastPage()
+    public function getLastPage() : float
     {
         return ceil($this->totalItems / $this->maxResults) ?: 1.;
     }
@@ -75,7 +80,7 @@ class Paginator implements \IteratorAggregate, PaginatorInterface
     /**
      * {@inheritdoc}
      */
-    public function getItemsPerPage()
+    public function getItemsPerPage() : float
     {
         return (float) $this->maxResults;
     }
@@ -83,7 +88,7 @@ class Paginator implements \IteratorAggregate, PaginatorInterface
     /**
      * {@inheritdoc}
      */
-    public function getTotalItems()
+    public function getTotalItems() : float
     {
         return (float) $this->totalItems;
     }
