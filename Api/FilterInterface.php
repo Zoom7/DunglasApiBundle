@@ -32,5 +32,5 @@ interface FilterInterface
      *
      * @return array
      */
-    public function getDescription(string $resourceClass) : string;
+    public function getDescription(string $resourceClass) : array;
 }

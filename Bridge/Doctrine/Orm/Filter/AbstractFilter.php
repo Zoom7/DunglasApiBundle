@@ -13,8 +13,7 @@ namespace Dunglas\ApiBundle\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Util\RequestParser;
+use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\RequestParser;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -28,14 +27,14 @@ use Symfony\Component\HttpFoundation\Request;
 abstract class AbstractFilter implements FilterInterface
 {
     /**
-     * @var array|null
-     */
-    protected $properties;
-
-    /**
      * @var ManagerRegistry
      */
     protected $managerRegistry;
+
+    /**
+     * @var array|null
+     */
+    protected $properties;
 
     public function __construct(ManagerRegistry $managerRegistry, array $properties = null)
     {
@@ -46,18 +45,16 @@ abstract class AbstractFilter implements FilterInterface
     /**
      * Gets class metadata for the given resource.
      *
-     * @param ResourceInterface $resource
+     * @param string $resourceClass
      *
      * @return ClassMetadata
      */
-    protected function getClassMetadata(ResourceInterface $resource)
+    protected function getClassMetadata(string $resourceClass) : ClassMetadata
     {
-        $entityClass = $resource->getEntityClass();
-
         return $this
             ->managerRegistry
-            ->getManagerForClass($entityClass)
-            ->getClassMetadata($entityClass)
+            ->getManagerForClass($resourceClass)
+            ->getClassMetadata($resourceClass)
         ;
     }
 
@@ -68,7 +65,7 @@ abstract class AbstractFilter implements FilterInterface
      *
      * @return bool
      */
-    protected function isPropertyEnabled($property)
+    protected function isPropertyEnabled(string $property) : bool
     {
         if (null === $this->properties) {
             // to ensure sanity, nested properties must still be explicitly enabled
@@ -81,20 +78,20 @@ abstract class AbstractFilter implements FilterInterface
     /**
      * Determines whether the given property is mapped.
      *
-     * @param string            $property
-     * @param ResourceInterface $resource
-     * @param bool              $allowAssociation
+     * @param string $property
+     * @param string $resourceClass
+     * @param bool   $allowAssociation
      *
      * @return bool
      */
-    protected function isPropertyMapped($property, ResourceInterface $resource, $allowAssociation = false)
+    protected function isPropertyMapped(string $property, string $resourceClass, bool $allowAssociation = false) : bool
     {
         if ($this->isPropertyNested($property)) {
             $propertyParts = $this->splitPropertyParts($property);
-            $metadata = $this->getNestedMetadata($resource, $propertyParts['associations']);
+            $metadata = $this->getNestedMetadata($resourceClass, $propertyParts['associations']);
             $property = $propertyParts['field'];
         } else {
-            $metadata = $this->getClassMetadata($resource);
+            $metadata = $this->getClassMetadata($resourceClass);
         }
 
         return $metadata->hasField($property) || ($allowAssociation && $metadata->hasAssociation($property));
@@ -107,7 +104,7 @@ abstract class AbstractFilter implements FilterInterface
      *
      * @return bool
      */
-    protected function isPropertyNested($property)
+    protected function isPropertyNested(string $property) : bool
     {
         return false !== strpos($property, '.');
     }
@@ -115,14 +112,14 @@ abstract class AbstractFilter implements FilterInterface
     /**
      * Gets nested class metadata for the given resource.
      *
-     * @param ResourceInterface $resource
-     * @param string[]          $associations
+     * @param string   $resourceClass
+     * @param string[] $associations
      *
      * @return ClassMetadata
      */
-    protected function getNestedMetadata(ResourceInterface $resource, array $associations)
+    protected function getNestedMetadata(string $resourceClass, array $associations) : ClassMetadata
     {
-        $metadata = $this->getClassMetadata($resource);
+        $metadata = $this->getClassMetadata($resourceClass);
 
         foreach ($associations as $association) {
             if ($metadata->hasAssociation($association)) {
@@ -150,7 +147,7 @@ abstract class AbstractFilter implements FilterInterface
      *
      * @return array
      */
-    protected function splitPropertyParts($property)
+    protected function splitPropertyParts(string $property) : array
     {
         $parts = explode('.', $property);
 
@@ -167,7 +164,7 @@ abstract class AbstractFilter implements FilterInterface
      *
      * @return array
      */
-    protected function extractProperties(Request $request)
+    protected function extractProperties(Request $request) : array
     {
         $needsFixing = false;
 

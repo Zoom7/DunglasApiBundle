@@ -13,7 +13,6 @@ namespace Dunglas\ApiBundle\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryNameGenerator;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -34,7 +33,7 @@ class DateFilter extends AbstractFilter
     /**
      * @var array
      */
-    private static $doctrineDateTypes = [
+    CONST DOCTRINE_DATE_TYPES = [
         'date' => true,
         'datetime' => true,
         'datetimetz' => true,
@@ -61,7 +60,7 @@ class DateFilter extends AbstractFilter
     /**
      * {@inheritdoc}
      */
-    public function apply(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function apply(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         $request = $this->requestStack->getCurrentRequest();
         if (null === $request) {
@@ -72,8 +71,8 @@ class DateFilter extends AbstractFilter
             // Expect $values to be an array having the period as keys and the date value as values
             if (
                 !$this->isPropertyEnabled($property) ||
-                !$this->isPropertyMapped($property, $resource) ||
-                !$this->isDateField($property, $resource) ||
+                !$this->isPropertyMapped($property, $resourceClass) ||
+                !$this->isDateField($property, $resourceClass) ||
                 !is_array($values)
             ) {
                 continue;
@@ -136,7 +135,7 @@ class DateFilter extends AbstractFilter
      * @param string       $value
      * @param int|null     $nullManagement
      */
-    private function addWhere(QueryBuilder $queryBuilder, $alias, $field, $operator, $value, $nullManagement)
+    private function addWhere(QueryBuilder $queryBuilder, string $alias, string $field, string $operator, string $value, int $nullManagement = null)
     {
         $valueParameter = QueryNameGenerator::generateParameterName(sprintf('%s_%s', $field, $operator));
         $baseWhere = sprintf('%s.%s %s :%s', $alias, $field, self::PARAMETER_BEFORE === $operator ? '<=' : '>=', $valueParameter);
@@ -164,17 +163,17 @@ class DateFilter extends AbstractFilter
     /**
      * {@inheritdoc}
      */
-    public function getDescription(ResourceInterface $resource)
+    public function getDescription(string $resourceClass) : array
     {
         $description = [];
 
         $properties = $this->properties;
         if (null === $properties) {
-            $properties = array_fill_keys($this->getClassMetadata($resource)->getFieldNames(), null);
+            $properties = array_fill_keys($this->getClassMetadata($resourceClass)->getFieldNames(), null);
         }
 
         foreach ($properties as $property => $nullManagement) {
-            if (!$this->isPropertyMapped($property, $resource) || !$this->isDateField($property, $resource)) {
+            if (!$this->isPropertyMapped($property, $resourceClass) || !$this->isDateField($property, $resourceClass)) {
                 continue;
             }
 
@@ -193,7 +192,7 @@ class DateFilter extends AbstractFilter
      *
      * @return array
      */
-    private function getFilterDescription($property, $period)
+    private function getFilterDescription(string $property, string $period) : array
     {
         return [
             sprintf('%s[%s]', $property, $period) => [
@@ -207,16 +206,16 @@ class DateFilter extends AbstractFilter
     /**
      * Determines whether the given property refers to a date field.
      *
-     * @param string            $property
-     * @param ResourceInterface $resource
+     * @param string $property
+     * @param string $resourceClass
      *
      * @return bool
      */
-    private function isDateField($property, ResourceInterface $resource)
+    private function isDateField(string $property, string $resourceClass) : bool
     {
         $propertyParts = $this->splitPropertyParts($property);
-        $metadata = $this->getNestedMetadata($resource, $propertyParts['associations']);
+        $metadata = $this->getNestedMetadata($resourceClass, $propertyParts['associations']);
 
-        return isset(self::$doctrineDateTypes[$metadata->getTypeOfField($propertyParts['field'])]);
+        return isset(self::DOCTRINE_DATE_TYPES[$metadata->getTypeOfField($propertyParts['field'])]);
     }
 }

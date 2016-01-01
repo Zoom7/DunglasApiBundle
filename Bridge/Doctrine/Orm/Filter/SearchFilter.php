@@ -36,14 +36,17 @@ class SearchFilter extends AbstractFilter
      * @var string The value must be contained in the field.
      */
     const STRATEGY_PARTIAL = 'partial';
+
     /**
      * @var string Finds fields that are starting with the value.
      */
     const STRATEGY_START = 'start';
+
     /**
      * @var string Finds fields that are ending with the value.
      */
     const STRATEGY_END = 'end';
+
     /**
      * @var string Finds fields that are starting with the word.
      */
@@ -69,7 +72,7 @@ class SearchFilter extends AbstractFilter
      * @param RequestStack              $requestStack
      * @param IriConverterInterface     $iriConverter
      * @param PropertyAccessorInterface $propertyAccessor
-     * @param null|array                $properties       Null to allow filtering on all properties with the exact strategy or a map of property name with strategy.
+     * @param array|null                $properties       Null to allow filtering on all properties with the exact strategy or a map of property name with strategy.
      */
     public function __construct(
         ManagerRegistry $managerRegistry,
@@ -88,7 +91,7 @@ class SearchFilter extends AbstractFilter
     /**
      * {@inheritdoc}
      */
-    public function apply(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function apply(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         $request = $this->requestStack->getCurrentRequest();
         if (null === $request) {
@@ -98,7 +101,7 @@ class SearchFilter extends AbstractFilter
         foreach ($this->extractProperties($request) as $property => $value) {
             if (
                 !$this->isPropertyEnabled($property) ||
-                !$this->isPropertyMapped($property, $resource, true) ||
+                !$this->isPropertyMapped($property, $resourceClass, true) ||
                 null === $value
             ) {
                 continue;
@@ -120,9 +123,9 @@ class SearchFilter extends AbstractFilter
 
                 $field = $propertyParts['field'];
 
-                $metadata = $this->getNestedMetadata($resource, $propertyParts['associations']);
+                $metadata = $this->getNestedMetadata($resourceClass, $propertyParts['associations']);
             } else {
-                $metadata = $this->getClassMetadata($resource);
+                $metadata = $this->getClassMetadata($resourceClass);
             }
 
             if ($metadata->hasField($field)) {
@@ -185,7 +188,7 @@ class SearchFilter extends AbstractFilter
      *
      * @throws InvalidArgumentException If strategy does not exist
      */
-    private function addWhereByStrategy($strategy, QueryBuilder $queryBuilder, $alias, $field, $value)
+    private function addWhereByStrategy(string $strategy, QueryBuilder $queryBuilder, string $alias, string $field, string $value) : string
     {
         $valueParameter = QueryNameGenerator::generateParameterName($field);
 
@@ -224,17 +227,17 @@ class SearchFilter extends AbstractFilter
     /**
      * {@inheritdoc}
      */
-    public function getDescription(ResourceInterface $resource)
+    public function getDescription(string $resourceClass) : array
     {
         $description = [];
 
         $properties = $this->properties;
         if (null === $properties) {
-            $properties = array_fill_keys($this->getClassMetadata($resource)->getFieldNames(), null);
+            $properties = array_fill_keys($this->getClassMetadata($resourceClass)->getFieldNames(), null);
         }
 
         foreach ($properties as $property => $strategy) {
-            if (!$this->isPropertyMapped($property, $resource, true)) {
+            if (!$this->isPropertyMapped($property, $resourceClass, true)) {
                 continue;
             }
 
@@ -243,11 +246,11 @@ class SearchFilter extends AbstractFilter
 
                 $field = $propertyParts['field'];
 
-                $metadata = $this->getNestedMetadata($resource, $propertyParts['associations']);
+                $metadata = $this->getNestedMetadata($resourceClass, $propertyParts['associations']);
             } else {
                 $field = $property;
 
-                $metadata = $this->getClassMetadata($resource);
+                $metadata = $this->getClassMetadata($resourceClass);
             }
 
             if ($metadata->hasField($field)) {
@@ -286,7 +289,7 @@ class SearchFilter extends AbstractFilter
      *
      * @return string
      */
-    private function getFilterValueFromUrl($value)
+    private function getFilterValueFromUrl(string $value) : string
     {
         try {
             if ($item = $this->iriConverter->getItemFromIri($value)) {

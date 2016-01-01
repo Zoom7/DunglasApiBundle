@@ -9,12 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Util;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation;
 
+use Dunglas\ApiBundle\Util\string;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Utility functions for working with Symfony HttpFoundation request.
+ *
+ * @internal
  *
  * @author Teoh Han Hui <teohhanhui@gmail.com>
  * @author Vincent Chalamon <vincentchalamon@gmail.com>
@@ -28,7 +31,7 @@ abstract class RequestParser
      *
      * @return Request
      */
-    public static function parseAndDuplicateRequest(Request $request)
+    public static function parseAndDuplicateRequest(Request $request) : Request
     {
         $query = self::parseRequestParams($request->getQueryString());
         $body = self::parseRequestParams($request->getContent());
@@ -47,7 +50,7 @@ abstract class RequestParser
      *
      * @return array
      */
-    private static function parseRequestParams($source)
+    private static function parseRequestParams(string $source) : array
     {
         $source = urldecode($source);
 

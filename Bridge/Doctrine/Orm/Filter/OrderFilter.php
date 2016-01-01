@@ -13,7 +13,6 @@ namespace Dunglas\ApiBundle\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryNameGenerator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -45,7 +44,7 @@ class OrderFilter extends AbstractFilter
     public function __construct(
         ManagerRegistry $managerRegistry,
         RequestStack $requestStack,
-        $orderParameter,
+        string $orderParameter,
         array $properties = null
     ) {
         parent::__construct($managerRegistry, $properties);
@@ -62,7 +61,7 @@ class OrderFilter extends AbstractFilter
      * For each property passed, if the resource does not have such property or if the order value is different from
      * `asc` or `desc` (case insensitive), the property is ignored.
      */
-    public function apply(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function apply(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         $request = $this->requestStack->getCurrentRequest();
         if (null === $request) {
@@ -72,7 +71,7 @@ class OrderFilter extends AbstractFilter
         $properties = $this->extractProperties($request);
 
         foreach ($properties as $property => $order) {
-            if (!$this->isPropertyEnabled($property) || !$this->isPropertyMapped($property, $resource)) {
+            if (!$this->isPropertyEnabled($property) || !$this->isPropertyMapped($property, $resourceClass)) {
                 continue;
             }
 
@@ -109,17 +108,17 @@ class OrderFilter extends AbstractFilter
     /**
      * {@inheritdoc}
      */
-    public function getDescription(ResourceInterface $resource)
+    public function getDescription(string $resourceClass) : array
     {
         $description = [];
 
         $properties = $this->properties;
         if (null === $properties) {
-            $properties = array_fill_keys($this->getClassMetadata($resource)->getFieldNames(), null);
+            $properties = array_fill_keys($this->getClassMetadata($resourceClass)->getFieldNames(), null);
         }
 
         foreach ($properties as $property => $order) {
-            if (!$this->isPropertyMapped($property, $resource)) {
+            if (!$this->isPropertyMapped($property, $resourceClass)) {
                 continue;
             }
 
