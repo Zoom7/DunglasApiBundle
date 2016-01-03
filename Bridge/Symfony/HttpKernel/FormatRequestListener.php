@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\EventListener;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel;
 
 use Negotiation\FormatNegotiatorInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -34,7 +34,7 @@ final class FormatRequestListener
      * @param FormatNegotiatorInterface $formatNegotiator
      * @param string[]                  $supportedFormats
      */
-    public function __construct(FormatNegotiatorInterface $formatNegotiator, $supportedFormats)
+    public function __construct(FormatNegotiatorInterface $formatNegotiator, array $supportedFormats)
     {
         $this->formatNegotiator = $formatNegotiator;
         $this->supportedFormats = $supportedFormats;

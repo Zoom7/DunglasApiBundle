@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\EventListener;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel;
 
 use Dunglas\ApiBundle\Exception\ValidationException;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;

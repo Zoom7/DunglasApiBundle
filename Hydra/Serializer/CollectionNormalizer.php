@@ -11,8 +11,10 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
-use Dunglas\ApiBundle\Api\ResourceResolver;
+use Dunglas\ApiBundle\Api\ResourceClassResolver;
+use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
+use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
 use Dunglas\ApiBundle\JsonLd\Serializer\ContextTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
@@ -39,14 +41,14 @@ class CollectionNormalizer extends SerializerAwareNormalizer implements Normaliz
      */
     private $contextBuilder;
     /**
-     * @var ResourceResolver
+     * @var ResourceClassResolverInterface
      */
     private $resourceResolver;
 
     /**
      * @param ContextBuilder $contextBuilder
      */
-    public function __construct(ContextBuilder $contextBuilder, ResourceResolver $resourceResolver)
+    public function __construct(ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceResolver)
     {
         $this->contextBuilder = $contextBuilder;
         $this->resourceResolver = $resourceResolver;
@@ -65,7 +67,7 @@ class CollectionNormalizer extends SerializerAwareNormalizer implements Normaliz
      */
     public function normalize($object, $format = null, array $context = array())
     {
-        $resource = $this->resourceResolver->guessResource($object, $context);
+        $resource = $this->resourceResolver->getResourceClass($object, $context);
 
         if (isset($context['jsonld_sub_level'])) {
             $data = [];

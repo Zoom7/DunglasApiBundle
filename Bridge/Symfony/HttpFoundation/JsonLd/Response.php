@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\JsonLd;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 

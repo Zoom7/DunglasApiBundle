@@ -11,8 +11,6 @@
 
 namespace Dunglas\ApiBundle\JsonLd\Serializer;
 
-use Dunglas\ApiBundle\Api\ResourceInterface;
-
 /**
  * Serializer context creation and manipulation.
  *
@@ -23,39 +21,39 @@ trait ContextTrait
     /**
      * Creates normalization context.
      *
-     * @param ResourceInterface $resource
-     * @param array             $context
+     * @param string $resourceClass
+     * @param array  $context
      *
      * @return array
      */
-    private function createContext(ResourceInterface $resource, $context)
+    private function createContext(string $resourceClass, array $context) : array
     {
-        if (!isset($context['jsonld_has_context'])) {
-            $context += [
-                'resource' => $resource,
-                'jsonld_has_context' => true,
-                // Don't use hydra:Collection in sub levels
-                'jsonld_sub_level' => true,
-                'jsonld_normalization_groups' => $resource->getNormalizationGroups(),
-                'jsonld_denormalization_groups' => $resource->getDenormalizationGroups(),
-                'jsonld_validation_groups' => $resource->getValidationGroups(),
-            ];
+        if (isset($context['jsonld_has_context'])) {
+            return $context;
         }
 
-        return $context;
+        return $context + [
+            'resource_class' => $resourceClass,
+            'jsonld_has_context' => true,
+            // Don't use hydra:Collection in sub levels
+            'jsonld_sub_level' => true,
+            'jsonld_normalization_groups' => $resource->getNormalizationGroups(),
+            'jsonld_denormalization_groups' => $resource->getDenormalizationGroups(),
+            'jsonld_validation_groups' => $resource->getValidationGroups(),
+        ];
     }
 
     /**
      * Creates relation context.
      *
-     * @param ResourceInterface $resource
-     * @param array             $context
+     * @param string $resourceClass
+     * @param array  $context
      *
      * @return array
      */
-    private function createRelationContext(ResourceInterface $resource, array $context)
+    private function createRelationContext(string $resourceClass, array $context) : array
     {
-        $context['resource'] = $resource;
+        $context['resource_class'] = $resourceClass;
         unset($context['object_to_populate']);
 
         return $context;

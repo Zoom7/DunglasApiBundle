@@ -11,16 +11,17 @@
 
 namespace Dunglas\ApiBundle\Bridge\Symfony\Routing;
 
+use DunglasApiBundle\Api\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Router decorator.
+ * Symfony router decorator.
  *
  * Kévin Dunglas <dunglas@gmail.com>
  */
-final class Router implements RouterInterface
+final class Router implements RouterInterface, UrlGeneratorInterface
 {
     /**
      * @var RouterInterface
@@ -56,7 +57,7 @@ final class Router implements RouterInterface
         return $this->router->getRouteCollection();
     }
 
-    /*
+    /**
      * {@inheritdoc}
      */
     public function match($pathInfo)
@@ -78,7 +79,7 @@ final class Router implements RouterInterface
         }
     }
 
-    /*
+    /**
      * {@inheritdoc}
      */
     public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)

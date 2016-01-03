@@ -23,7 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  *
  * @author Samuel ROZE <samuel.roze@gmail.com>
  */
-class CollectionFiltersEnhancer extends SerializerAwareNormalizer implements NormalizerInterface
+class CollectionFiltersNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
 {
     /**
      * @var CollectionNormalizer

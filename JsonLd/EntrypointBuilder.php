@@ -12,86 +12,69 @@
 namespace Dunglas\ApiBundle\JsonLd;
 
 use Dunglas\ApiBundle\Api\IriConverterInterface;
-use Dunglas\ApiBundle\Api\ResourceCollectionInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
-use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
-use Symfony\Component\Routing\RouterInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 
 /**
- * API Entrypoint builder.
+ * {@inheritdoc}
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class EntrypointBuilder
+final class EntrypointBuilder implements EntrypointBuilderInterface
 {
-    /**
-     * @var ResourceCollectionInterface
-     */
-    private $resourceCollection;
     /**
      * @var IriConverterInterface
      */
     private $iriConverter;
-    /**
-     * @var RouterInterface
-     */
-    private $router;
 
-    public function __construct(
-        ResourceTypeRegistryInterface $resourceCollection,
-        IriConverterInterface $iriConverter,
-        RouterInterface $router
-    ) {
-        $this->resourceCollection = $resourceCollection;
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+
+    /**
+     * @var CollectionMetadataFactoryInterface
+     */
+    private $collectionMetadataFactory;
+
+    /**
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
+    public function __construct(IriConverterInterface $iriConverter, UrlGeneratorInterface $urlGenerator, CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory) {
         $this->iriConverter = $iriConverter;
-        $this->router = $router;
+        $this->urlGenerator = $urlGenerator;
+        $this->collectionMetadataFactory = $collectionMetadataFactory;
+        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
-     * Gets the entrypoint of the API.
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function getEntrypoint()
+    public function getEntrypoint(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
     {
         $entrypoint = [
-            '@context' => $this->router->generate('api_jsonld_context', ['shortName' => 'Entrypoint']),
-            '@id' => $this->router->generate('api_jsonld_entrypoint'),
+            '@context' => $this->urlGenerator->generate('api_jsonld_context', ['shortName' => 'Entrypoint'], $referenceType),
+            '@id' => $this->urlGenerator->generate('api_jsonld_entrypoint', [], $referenceType),
             '@type' => 'Entrypoint',
         ];
 
-        foreach ($this->resourceCollection as $resource) {
-            if (!empty($resource->getCollectionOperations())) {
-                try {
-                    $entrypoint[lcfirst($resource->getShortName())] = $this->iriConverter->getIriFromResource($resource);
-                } catch (InvalidArgumentException $ex) {
-                    if ($this->hasGetCollectionOperation($resource)) {
-                        throw $ex;
-                    }
-                }
+        foreach ($this->collectionMetadataFactory->create() as $resourceClass) {
+            $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+
+            if (empty($itemMetadata->getCollectionOperations())) {
+                continue;
+            }
+            try {
+                $entrypoint[lcfirst($itemMetadata->getShortName())] = $this->iriConverter->getIriFromResourceClass($resourceClass);
+            } catch (InvalidArgumentException $ex) {
+                // Ignore resources without GET operations
             }
         }
 
         return $entrypoint;
-    }
-
-    /**
-     * Returns true if at least one GET collection operation exists for the given resource.
-     *
-     * @param ResourceInterface $resource
-     *
-     * @return bool
-     */
-    private function hasGetCollectionOperation(ResourceInterface $resource)
-    {
-        foreach ($resource->getCollectionOperations() as $operation) {
-            $methods = $operation->getRoute()->getMethods();
-            if (empty($methods) || in_array('GET', $methods)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

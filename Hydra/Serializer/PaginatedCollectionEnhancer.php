@@ -11,8 +11,9 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
+use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Api\ResourceResolver;
+use Dunglas\ApiBundle\Api\ResourceClassResolver;
 use Dunglas\ApiBundle\Model\PaginatorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
@@ -35,15 +36,15 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
      */
     private $collectionNormalizer;
     /**
-     * @var ResourceResolver
+     * @var ResourceClassResolverInterface
      */
     private $resourceResolver;
 
     /**
      * @param NormalizerInterface $collectionNormalizer
-     * @param ResourceResolver    $resourceResolver
+     * @param ResourceClassResolverInterface $resourceResolver
      */
-    public function __construct(NormalizerInterface $collectionNormalizer, ResourceResolver $resourceResolver)
+    public function __construct(NormalizerInterface $collectionNormalizer, ResourceClassResolverInterface $resourceResolver)
     {
         $this->collectionNormalizer = $collectionNormalizer;
         $this->resourceResolver = $resourceResolver;
@@ -59,7 +60,7 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
             return $data;
         }
 
-        $resource = $this->resourceResolver->guessResource($object, $context);
+        $resource = $this->resourceResolver->getResourceClass($object, $context);
         list($parts, $parameters) = $this->parseRequestUri($resource, $context['request_uri']);
 
         $data['@type'] = self::HYDRA_PAGED_COLLECTION;

@@ -15,8 +15,8 @@ use Dunglas\ApiBundle\Api\Operation\OperationInterface;
 use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
+use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
 use Dunglas\ApiBundle\Mapping\AttributeMetadataInterface;
-use Dunglas\ApiBundle\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
@@ -25,22 +25,27 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
      * @var ResourceCollectionInterface
      */
     private $resourceCollection;
+
     /**
      * @var ContextBuilder
      */
     private $contextBuilder;
+
     /**
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var ClassMetadataFactoryInterface
      */
     private $classMetadataFactory;
+
     /**
      * @var string
      */
     private $title;
+
     /**
      * @var string
      */
@@ -54,14 +59,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
      * @param string                        $title
      * @param string                        $description
      */
-    public function __construct(
-        ResourceTypeRegistryInterface $resourceCollection,
-        ContextBuilder $contextBuilder,
-        RouterInterface $router,
-        ClassMetadataFactoryInterface $classMetadataFactory,
-        $title,
-        $description
-    ) {
+    public function __construct(ResourceTypeRegistryInterface $resourceCollection, ContextBuilderInterface $contextBuilder, RouterInterface $router, ClassMetadataFactoryInterface $classMetadataFactory, string $title, string $description) {
         $this->resourceCollection = $resourceCollection;
         $this->contextBuilder = $contextBuilder;
         $this->router = $router;

@@ -9,12 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Hydra\EventListener;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel\Hydra;
 
+use DunglasApiBundle\Api\UrlGeneratorInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Adds the HTTP Link header pointing to the Hydra documentation.
@@ -24,13 +23,13 @@ use Symfony\Component\Routing\RouterInterface;
 final class LinkHeaderResponseListener
 {
     /**
-     * @var RouterInterface
+     * @var UrlGeneratorInterface
      */
-    private $router;
+    private $urlGenerator;
 
-    public function __construct(RouterInterface $router)
+    public function __construct(UrlGeneratorInterface $urlGenerator)
     {
-        $this->router = $router;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**
@@ -42,7 +41,7 @@ final class LinkHeaderResponseListener
     {
         $event->getResponse()->headers->set('Link', sprintf(
             '<%s>; rel="%sapiDocumentation"',
-            $this->router->generate('api_hydra_vocab', [], UrlGeneratorInterface::ABSOLUTE_URL), ContextBuilder::HYDRA_NS)
+            $this->urlGenerator->generate('api_hydra_vocab', [], UrlGeneratorInterface::ABSOLUTE_URL), ContextBuilder::HYDRA_NS)
         );
     }
 }

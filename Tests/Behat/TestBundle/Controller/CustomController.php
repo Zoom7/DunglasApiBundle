@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\Tests\Behat\TestBundle\Controller;
 
-use Dunglas\ApiBundle\JsonLd\Response;
+use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**

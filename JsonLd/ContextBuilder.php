@@ -11,56 +11,83 @@
 
 namespace Dunglas\ApiBundle\JsonLd;
 
-use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\JsonLd\Event\ContextBuilderEvent;
-use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Routing\RouterInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface as PropertyCollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface as PropertyItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface as ResourceCollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
+use DunglasApiBundle\Api\UrlGeneratorInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 /**
- * JSON-LD Context Builder.
+ * {@inheritdoc}
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ContextBuilder
+final class ContextBuilder implements ContextBuilderInterface
 {
-    const HYDRA_NS = 'http://www.w3.org/ns/hydra/core#';
-    const RDF_NS = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
-    const RDFS_NS = 'http://www.w3.org/2000/01/rdf-schema#';
-    const XML_NS = 'http://www.w3.org/2001/XMLSchema#';
-    const OWL_NS = 'http://www.w3.org/2002/07/owl#';
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
 
     /**
-     * @var RouterInterface
+     * @var ResourceCollectionMetadataFactoryInterface
      */
-    private $router;
+    private $resourceCollectionMetadataFactory;
 
     /**
-     * @var EventDispatcherInterface
+     * @var ResourceItemMetadataFactoryInterface
      */
-    private $eventDispatcher;
+    private $resourceItemMetadataFactory;
 
-    private $itemMetadataFactory;
+    /**
+     * @var PropertyCollectionMetadataFactoryInterface
+     */
+    private $propertyCollectionMetadataFactory;
 
-    public function __construct(RouterInterface $router, EventDispatcherInterface $eventDispatcher, ItemMetadataFactoryInterface $itemMetadataFactory)
+    /**
+     * @var PropertyItemMetadataFactoryInterface
+     */
+    private $propertyItemMetadataFactory;
+
+    /**
+     * @var NameConverterInterface
+     */
+    private $nameConverter;
+
+    public function __construct(UrlGeneratorInterface $urlGenerator, ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory, NameConverterInterface $nameConverter = null)
     {
-        $this->router = $router;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->urlGenerator = $urlGenerator;
+        $this->resourceCollectionMetadataFactory = $resourceCollectionMetadataFactory;
+        $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
+        $this->propertyCollectionMetadataFactory = $propertyCollectionMetadataFactory;
+        $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
+        $this->nameConverter = $nameConverter;
+
     }
 
     /**
-     * Builds the JSON-LD context for the entrypoint.
-     *
-     * @return array
+     * {@inheritdoc}
      */
-    public function getEntrypointContext() : array
+    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
-        $context = $this->getBaseContext();
+        return [
+            '@vocab' => $this->urlGenerator->generate('api_hydra_vocab', [], $referenceType).'#',
+            'hydra' => self::HYDRA_NS,
+        ];
+    }
 
-        foreach ($this->resourceCollection as $resource) {
-            $resourceName = lcfirst($resource->getShortName());
+    /**
+     * {@inheritdoc}
+     */
+    public function getEntrypointContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
+    {
+        $context = $this->getBaseContext($referenceType);
+
+        foreach ($this->resourceCollectionMetadataFactory->create() as $resourceClass) {
+            $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
+
+            $resourceName = lcfirst($itemMetadata->getShortName());
 
             $context[$resourceName] = [
                 '@id' => 'Entrypoint/'.$resourceName,
@@ -72,61 +99,46 @@ class ContextBuilder
     }
 
     /**
-     * @param string $resourceClass
-     * @param array  $normalizationContext
-     *
-     * @return array|string
+     * {@inheritdoc}
      */
-    public function getResourceContext(string $resourceClass, array $normalizationContext)
+    public function getResourceContext(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
     {
-        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
-        // TODO
+        $context = $this->getBaseContext($referenceType);
 
-        if (isset($normalizationContext['jsonld_context_embedded'])) {
-            return $this->getContext($resource);
+        $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
+
+        $prefixedShortName = sprintf('#%s', $itemMetadata->getShortName());
+
+        foreach ($this->propertyCollectionMetadataFactory->create($resourceClass) as $propertyName) {
+            $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
+
+            if (!$propertyItemMetadata->isIdentifier()) {
+                continue;
+            }
+
+            $convertedName = $this->nameConverter ? $this->nameConverter->normalize($propertyName) : $propertyName;
+
+            if (!$id = $propertyItemMetadata->getIri()) {
+                $id = sprintf('%s/%s', $prefixedShortName, $convertedName);
+            }
+
+            if ($propertyItemMetadata->isReadableLink()) {
+                $context[$convertedName] = [
+                    '@id' => $id,
+                    '@type' => '@id',
+                ];
+            } else {
+                $context[$convertedName] = $id;
+            }
         }
 
-        return $this->getContextUri($resource);
+        return $context;
     }
 
-    /**
-     * Builds the JSON-LD context for the given resource.
-     *
-     * @param string|null $resourceClass
-     *
-     * @return array
-     */
-    public function getContext(string $resourceClass = null) : array
+    public function getResourceContextUri(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : string
     {
-        $context = $this->getBaseContext();
-        $event = new ContextBuilderEvent($context, $resourceClass);
-        $this->eventDispatcher->dispatch(Event\Events::CONTEXT_BUILDER, $event);
+        $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
 
-        return $event->getContext();
-    }
-
-    /**
-     * Gets the context URI for the given resource.
-     *
-     * @param ResourceInterface $resource
-     *
-     * @return string
-     */
-    public function getContextUri(string $resourceClass)
-    {
-        return $this->router->generate('api_jsonld_context', ['shortName' => $resource->getShortName()]);
-    }
-
-    /**
-     * Gets the base context.
-     *
-     * @return array
-     */
-    private function getBaseContext()
-    {
-        return [
-            '@vocab' => $this->router->generate('api_hydra_vocab', [], RouterInterface::ABSOLUTE_URL).'#',
-            'hydra' => self::HYDRA_NS,
-        ];
+        return $this->urlGenerator->generate('api_jsonld_context', ['shortName' => $itemMetadata->getShortName()]);
     }
 }

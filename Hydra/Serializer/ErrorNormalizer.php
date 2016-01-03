@@ -11,8 +11,8 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
+use DunglasApiBundle\Api\UrlGeneratorInterface;
 use Symfony\Component\Debug\Exception\FlattenException;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
@@ -27,21 +27,21 @@ class ErrorNormalizer implements NormalizerInterface
     const FORMAT = 'hydra-error';
 
     /**
-     * @var RouterInterface
+     * @var UrlGeneratorInterface
      */
-    private $router;
+    private $urlGenerator;
     /**
      * @var bool
      */
     private $debug;
 
     /**
-     * @param RouterInterface $router
-     * @param bool            $debug
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param bool                  $debug
      */
-    public function __construct(RouterInterface $router, $debug)
+    public function __construct(UrlGeneratorInterface $urlGenerator, $debug)
     {
-        $this->router = $router;
+        $this->urlGenerator = $urlGenerator;
         $this->debug = $debug;
     }
 
@@ -59,7 +59,7 @@ class ErrorNormalizer implements NormalizerInterface
         }
 
         $data = [
-            '@context' => $this->router->generate('api_jsonld_context', ['shortName' => 'Error']),
+            '@context' => $this->urlGenerator->generate('api_jsonld_context', ['shortName' => 'Error']),
             '@type' => 'Error',
             'hydra:title' => isset($context['title']) ? $context['title'] : 'An error occurred',
             'hydra:description' => isset($message) ? $message : (string) $object,

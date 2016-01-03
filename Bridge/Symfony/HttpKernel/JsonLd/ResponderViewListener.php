@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\JsonLd\EventListener;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel\JsonLd;
 
-use Dunglas\ApiBundle\JsonLd\Response as JsonLdResponse;
+use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response as JsonLdResponse;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

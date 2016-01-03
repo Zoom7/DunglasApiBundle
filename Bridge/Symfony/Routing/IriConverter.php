@@ -16,6 +16,7 @@ use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Api\DataProviderInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Routing\Exception\ExceptionInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -53,19 +54,12 @@ final class IriConverter implements IriConverterInterface
     private $propertyAccessor;
 
 
-    public function __construct(
-        CollectionMetadataFactoryInterface $collectionMetadataFactory,
-        ItemMetadataFactoryInterface $itemMetadataFactory,
-        DataProviderInterface $dataProvider,
-        RouterInterface $router,
-        PropertyAccessorInterface $propertyAccessor
-    ) {
+    public function __construct(CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, DataProviderInterface $dataProvider, RouterInterface $router, PropertyAccessorInterface $propertyAccessor = null) {
         $this->collectionMetadataFactory = $collectionMetadataFactory;
         $this->itemMetadataFactory = $itemMetadataFactory;
         $this->dataProvider = $dataProvider;
         $this->router = $router;
-        $this->propertyAccessor = $propertyAccessor;
-        $this->routeCache = new \SplObjectStorage();
+        $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
     }
 
     /**
@@ -113,7 +107,7 @@ final class IriConverter implements IriConverterInterface
     /**
      * {@inheritdoc}
      */
-    public function getIriFromResource(string $resourceClass, $referenceType = RouterInterface::ABSOLUTE_PATH)
+    public function getIriFromResourceClass(string $resourceClass, $referenceType = RouterInterface::ABSOLUTE_PATH)
     {
         try {
             return $this->router->generate($this->getRouteName($resourceClass, true), [], $referenceType);
@@ -141,7 +135,7 @@ final class IriConverter implements IriConverterInterface
             $operation = $route->getOption(sprintf('_%s_operation_name', $operationType));
             $method = $route->getMethods()[0];
 
-            if ($resourceClass === $currentResourceClass && null !== $operation && 'GET' === $method) {
+            if ($resourceClass === $currentResourceClass && null !== $operation && in_array('GET', $method)) {
                 $found = true;
                 break;
             }

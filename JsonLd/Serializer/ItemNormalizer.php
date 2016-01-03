@@ -12,16 +12,20 @@
 namespace Dunglas\ApiBundle\JsonLd\Serializer;
 
 use Dunglas\ApiBundle\Api\IriConverterInterface;
+use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
 use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
 use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Dunglas\ApiBundle\Exception\RuntimeException;
-use Dunglas\ApiBundle\Api\ResourceResolver;
+use Dunglas\ApiBundle\Api\ResourceClassResolver;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
+use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
 use Dunglas\ApiBundle\Mapping\ClassMetadataInterface;
 use Dunglas\ApiBundle\Mapping\Factory\ClassMetadataFactoryInterface;
 use Dunglas\ApiBundle\Mapping\AttributeMetadataInterface;
 use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -34,7 +38,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ItemNormalizer extends AbstractNormalizer
+final class ItemNormalizer extends AbstractNormalizer
 {
     use ContextTrait;
 
@@ -44,47 +48,32 @@ class ItemNormalizer extends AbstractNormalizer
     const FORMAT = 'jsonld';
 
     /**
-     * @var ResourceCollectionInterface
-     */
-    private $resourceCollection;
-    /**
      * @var IriConverterInterface
      */
     private $iriConverter;
-    /**
-     * @var ClassMetadataFactoryInterface
-     */
-    private $apiClassMetadataFactory;
+
     /**
      * @var PropertyAccessorInterface
      */
     private $propertyAccessor;
+
     /**
-     * @var ContextBuilder
+     * @var ContextBuilderInterface
      */
     private $contextBuilder;
-    /**
-     * @var ResourceResolver
-     */
-    private $resourceResolver;
 
-    public function __construct(
-        ResourceTypeRegistryInterface $resourceCollection,
-        IriConverterInterface $iriConverter,
-        ClassMetadataFactoryInterface $apiClassMetadataFactory,
-        ContextBuilder $contextBuilder,
-        PropertyAccessorInterface $propertyAccessor,
-        ResourceResolver $resourceResolver,
-        NameConverterInterface $nameConverter = null
-    ) {
+    /**
+     * @var ResourceClassResolverInterface
+     */
+    private $resourceClassResolver;
+
+    public function __construct(IriConverterInterface $iriConverter, ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceClassResolver, PropertyAccessorInterface $propertyAccessor = null, NameConverterInterface $nameConverter = null) {
         parent::__construct(null, $nameConverter);
 
-        $this->resourceCollection = $resourceCollection;
         $this->iriConverter = $iriConverter;
-        $this->apiClassMetadataFactory = $apiClassMetadataFactory;
         $this->contextBuilder = $contextBuilder;
-        $this->propertyAccessor = $propertyAccessor;
-        $this->resourceResolver = $resourceResolver;
+        $this->resourceClassResolver = $resourceClassResolver;
+        $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
 
         $this->setCircularReferenceHandler(function ($object) {
             return $this->iriConverter->getIriFromItem($object);
@@ -116,20 +105,21 @@ class ItemNormalizer extends AbstractNormalizer
             return $this->handleCircularReference($object);
         }
 
-        $resource = $this->resourceResolver->guessResource($object, $context, true);
+        $resourceClass = isset($context['resource_class']) ? $context['resource_class'] : null;
+        $resourceClass = $this->resourceClassResolver->getResourceClass($object, $resourceClass, true);
 
         $data = [];
         if (!isset($context['jsonld_has_context'])) {
-            $data['@context'] = $this->contextBuilder->getResourceContext($resource, $context);
+            $data['@context'] = isset($context['jsonld_embed_context']) ? $this->contextBuilder->getResourceContext($resourceClass) : $this->contextBuilder->getResourceContextUri($resourceClass);
         }
 
-        $context = $this->createContext($resource, $context);
+        $context = $this->createContext($resourceClass, $context);
 
-        $classMetadata = $this->getMetadata($resource, $context);
+        $classMetadata = $this->getMetadata($resourceClass, $context);
         $attributesMetadata = $classMetadata->getAttributesMetadata();
 
         $data['@id'] = $this->iriConverter->getIriFromItem($object);
-        $data['@type'] = ($iri = $classMetadata->getIri()) ? $iri : $resource->getShortName();
+        $data['@type'] = ($iri = $classMetadata->getIri()) ? $iri : $resourceClass->getShortName();
 
         $identifierName = $classMetadata->getIdentifierName();
         foreach ($attributesMetadata as $attributeName => $attributeMetadata) {
@@ -149,7 +139,7 @@ class ItemNormalizer extends AbstractNormalizer
                 $type &&
                 $type->isCollection() &&
                 ($collectionType = $type->getCollectionType()) &&
-                $subResource = $this->resourceResolver->getResourceFromType($collectionType)
+                $subResource = $this->resourceClassResolver->getResourceFromType($collectionType)
             ) {
                 $values = [];
                 foreach ($attributeValue as $index => $obj) {
@@ -161,7 +151,7 @@ class ItemNormalizer extends AbstractNormalizer
                 continue;
             }
 
-            if ($attributeValue && $type && $subResource = $this->resourceResolver->getResourceFromType($type)) {
+            if ($attributeValue && $type && $subResource = $this->resourceClassResolver->getResourceFromType($type)) {
                 $data[$attributeName] = $this->normalizeRelation($attributeMetadata, $attributeValue, $subResource, $context);
 
                 continue;
@@ -193,7 +183,7 @@ class ItemNormalizer extends AbstractNormalizer
             throw new RuntimeException('The serializer must implement the DenormalizerInterface to denormalize relations.');
         }
 
-        $resource = $this->resourceResolver->guessResource($data, $context, true);
+        $resource = $this->resourceClassResolver->getResourceClass($data, $context, true);
         $normalizedData = $this->prepareForDenormalization($data);
 
         $context = $this->createContext($resource, $context);

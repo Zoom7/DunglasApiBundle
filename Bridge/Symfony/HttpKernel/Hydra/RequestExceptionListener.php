@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Hydra\EventListener;
+namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel\Hydra;
 
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\EventListener\ExceptionListener;
