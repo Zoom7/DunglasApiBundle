@@ -72,15 +72,4 @@ final class ResourceClassResolver implements ResourceClassResolverInterface
 
         return false;
     }
-
-    public function getResourceFromType(Type $type)
-    {
-        if (
-            'object' === $type->getType() &&
-            ($class = $type->getClass()) &&
-            $resource = $this->resourceCollection->getResourceForEntity($class)
-        ) {
-            return $resource;
-        }
-    }
 }
