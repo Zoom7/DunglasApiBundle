@@ -12,7 +12,7 @@
 namespace Dunglas\ApiBundle\Hydra\Action;
 
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
-use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response;
+use Dunglas\ApiBundle\JsonLd\Response;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -36,7 +36,7 @@ class ExceptionAction
 
     /**
      * Converts a {@see \Symfony\Component\Debug\Exception\FlattenException}
-     * to a {@see \Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response}.
+     * to a {@see \Dunglas\ApiBundle\JsonLd\Response}.
      *
      * @param FlattenException $exception
      *

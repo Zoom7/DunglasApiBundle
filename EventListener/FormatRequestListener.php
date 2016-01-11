@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel;
+namespace Dunglas\ApiBundle\EventListener;
 
 use Negotiation\FormatNegotiatorInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -25,6 +25,7 @@ final class FormatRequestListener
      * @var FormatNegotiatorInterface
      */
     private $formatNegotiator;
+
     /**
      * @var string[]
      */

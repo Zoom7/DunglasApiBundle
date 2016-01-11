@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
-use DunglasApiBundle\Api\UrlGeneratorInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * @author Kévin Dunglas <dunglas@gmail.com>
  * @author Samuel ROZE <samuel.roze@gmail.com>
  */
-class ErrorNormalizer implements NormalizerInterface
+final class ErrorNormalizer implements NormalizerInterface
 {
     const FORMAT = 'hydra-error';
 
@@ -30,16 +30,13 @@ class ErrorNormalizer implements NormalizerInterface
      * @var UrlGeneratorInterface
      */
     private $urlGenerator;
+
     /**
      * @var bool
      */
     private $debug;
 
-    /**
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param bool                  $debug
-     */
-    public function __construct(UrlGeneratorInterface $urlGenerator, $debug)
+    public function __construct(UrlGeneratorInterface $urlGenerator, bool $debug)
     {
         $this->urlGenerator = $urlGenerator;
         $this->debug = $debug;
@@ -48,21 +45,19 @@ class ErrorNormalizer implements NormalizerInterface
     /**
      * {@inheritdoc}
      */
-    public function normalize($object, $format = null, array $context = array())
+    public function normalize($object, $format = null, array $context = [])
     {
-        if ($object instanceof \Exception || $object instanceof FlattenException) {
-            $message = $object->getMessage();
+        $message = $object->getMessage();
 
-            if ($this->debug) {
-                $trace = $object->getTrace();
-            }
+        if ($this->debug) {
+            $trace = $object->getTrace();
         }
 
         $data = [
             '@context' => $this->urlGenerator->generate('api_jsonld_context', ['shortName' => 'Error']),
             '@type' => 'Error',
-            'hydra:title' => isset($context['title']) ? $context['title'] : 'An error occurred',
-            'hydra:description' => isset($message) ? $message : (string) $object,
+            'hydra:title' => $context['title'] ?? 'An error occurred',
+            'hydra:description' => $message ?? (string) $object,
         ];
 
         if (isset($trace)) {

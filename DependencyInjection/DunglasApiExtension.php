@@ -57,12 +57,12 @@ final class DunglasApiExtension extends Extension implements PrependExtensionInt
         $container->setParameter('api.collection.filter_name.order', $config['collection']['filter_name']['order']);
         $container->setParameter('api.collection.order', $config['collection']['order']);
         $container->setParameter('api.collection.pagination.enabled', $config['collection']['pagination']['enabled']);
-        $container->setParameter('api.collection.pagination.client_can_enable', $config['collection']['pagination']['client_can_enable']);
-        $container->setParameter('api.collection.pagination.enable_parameter', $config['collection']['pagination']['enable_parameter']);
-        $container->setParameter('api.collection.pagination.page_parameter', $config['collection']['pagination']['page_parameter']);
-        $container->setParameter('api.collection.pagination.items_per_page.default', $config['collection']['pagination']['items_per_page']['default']);
-        $container->setParameter('api.collection.pagination.items_per_page.client_can_change', $config['collection']['pagination']['items_per_page']['client_can_change']);
-        $container->setParameter('api.collection.pagination.items_per_page.parameter', $config['collection']['pagination']['items_per_page']['parameter']);
+        $container->setParameter('api.collection.pagination.client_enabled', $config['collection']['pagination']['client_enabled']);
+        $container->setParameter('api.collection.pagination.client_items_per_page', $config['collection']['pagination']['client_items_per_page']);
+        $container->setParameter('api.collection.pagination.items_per_page', $config['collection']['pagination']['items_per_page']);
+        $container->setParameter('api.collection.pagination.page_parameter_name', $config['collection']['pagination']['page_parameter_name']);
+        $container->setParameter('api.collection.pagination.enabled_parameter_name', $config['collection']['pagination']['enabled_parameter_name']);
+        $container->setParameter('api.collection.pagination.items_per_page_parameter_name', $config['collection']['pagination']['items_per_page_parameter_name']);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('api.xml');

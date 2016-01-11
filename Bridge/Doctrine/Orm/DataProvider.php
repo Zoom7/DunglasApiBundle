@@ -46,11 +46,6 @@ final class DataProvider implements DataProviderInterface
     private $itemMetadataFactory;
 
     /**
-     * @var DataProviderInterface|null
-     */
-    private $decorated;
-
-    /**
      * @var QueryItemExtensionInterface[]
      */
     private $itemExtensions;
@@ -61,20 +56,25 @@ final class DataProvider implements DataProviderInterface
     private $collectionExtensions;
 
     /**
+     * @var DataProviderInterface|null
+     */
+    private $decorated;
+
+    /**
      * @param ManagerRegistry                     $managerRegistry
      * @param CollectionMetadataFactoryInterface  $collectionMetadataFactory
      * @param ItemMetadataFactoryInterface        $itemMetadataFactory
      * @param QueryCollectionExtensionInterface[] $collectionExtensions
      * @param QueryItemExtensionInterface[]       $itemExtensions
      */
-    public function __construct(ManagerRegistry $managerRegistry, CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, DataProviderInterface $decorated = null, array $collectionExtensions = [], array $itemExtensions = [])
+    public function __construct(ManagerRegistry $managerRegistry, CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, array $collectionExtensions = [], array $itemExtensions = [], DataProviderInterface $decorated = null)
     {
         $this->managerRegistry = $managerRegistry;
         $this->collectionMetadataFactory = $collectionMetadataFactory;
         $this->itemMetadataFactory = $itemMetadataFactory;
-        $this->decorated = $decorated;
         $this->itemExtensions = $itemExtensions;
         $this->collectionExtensions = $collectionExtensions;
+        $this->decorated = $decorated;
     }
 
     /**

@@ -53,8 +53,8 @@ final class IriConverter implements IriConverterInterface
      */
     private $propertyAccessor;
 
-
-    public function __construct(CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, DataProviderInterface $dataProvider, RouterInterface $router, PropertyAccessorInterface $propertyAccessor = null) {
+    public function __construct(CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, DataProviderInterface $dataProvider, RouterInterface $router, PropertyAccessorInterface $propertyAccessor = null)
+    {
         $this->collectionMetadataFactory = $collectionMetadataFactory;
         $this->itemMetadataFactory = $itemMetadataFactory;
         $this->dataProvider = $dataProvider;
@@ -133,9 +133,9 @@ final class IriConverter implements IriConverterInterface
         foreach ($this->router->getRouteCollection()->all() as $routeName => $route) {
             $currentResourceClass = $route->getOption('_resource_class');
             $operation = $route->getOption(sprintf('_%s_operation_name', $operationType));
-            $method = $route->getMethods()[0];
+            $methods = $route->getMethods();
 
-            if ($resourceClass === $currentResourceClass && null !== $operation && in_array('GET', $method)) {
+            if ($resourceClass === $currentResourceClass && null !== $operation && (empty($methods) || in_array('GET', $methods))) {
                 $found = true;
                 break;
             }

@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\Tests\Behat\TestBundle\Controller;
 
-use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response;
+use Dunglas\ApiBundle\JsonLd\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
@@ -22,7 +22,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 class CustomController extends Controller
 {
     /**
-     * @return Response
+     * @return \Dunglas\ApiBundle\JsonLd\Response
      */
     public function customAction($id)
     {

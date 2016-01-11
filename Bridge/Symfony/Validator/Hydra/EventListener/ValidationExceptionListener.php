@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel\Hydra;
+namespace Dunglas\ApiBundle\Bridge\Symfony\Validator\Hydra\EventListener;
 
-use Dunglas\ApiBundle\Exception\ValidationException;
-use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response;
+use Dunglas\ApiBundle\Bridge\Symfony\Validator\Exception\ValidationException;
+use Dunglas\ApiBundle\JsonLd\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 

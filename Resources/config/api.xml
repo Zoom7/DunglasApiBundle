@@ -7,25 +7,35 @@
     <services>
         <service id="api.serializer" alias="serializer" />
 
-        <service id="api.property_accessor" alias="property_accessor" />
+        <service id="api.property_accessor" alias="property_accessor" public="false" />
 
-        <service id="api.property_info" alias="property_info" />
+        <service id="api.property_info" alias="property_info" public="false" />
 
-        <service id="api.data_provider" class="Dunglas\ApiBundle\Model\DataProviderChain" lazy="true" />
+        <service id="api.filters" class="Dunglas\ApiBundle\Api\FilterCollection" public="false" />
+
+        <service id="api.resource_class_resolver" class="Dunglas\ApiBundle\Api\ResourceClassResolver" public="false">
+            <argument type="service" id="api.metadata.resource.factory.collection" />
+        </service>
+
+        <service id="api.operation_method_resolver" class="Dunglas\ApiBundle\Bridge\Symfony\Routing\OperationMethodResolver" public="false">
+            <argument type="service" id="api.router" />
+            <argument type="service" id="api.metadata.resource.factory.item" />
+        </service>
 
         <service id="api.route_loader" class="Dunglas\ApiBundle\Bridge\Symfony\Routing\ApiLoader" public="false">
             <argument type="service" id="kernel" />
             <argument type="service" id="api.metadata.resource.factory.collection" />
             <argument type="service" id="api.metadata.resource.factory.item" />
+            <argument type="service" id="api.metadata.property.factory.item" />
 
             <tag name="routing.loader" />
         </service>
 
-        <service id="api.router" class="Dunglas\ApiBundle\Routing\Router" public="false">
+        <service id="api.router" class="Dunglas\ApiBundle\Bridge\Symfony\Routing\Router" public="false">
             <argument type="service" id="router" />
         </service>
 
-        <service id="api.iri_converter" class="Dunglas\ApiBundle\Api\IriConverter" public="false">
+        <service id="api.iri_converter" class="Dunglas\ApiBundle\Bridge\Symfony\Routing\IriConverter" public="false">
             <argument type="service" id="api.metadata.property.factory.collection" />
             <argument type="service" id="api.metadata.property.factory.item" />
             <argument type="service" id="api.data_provider" />
@@ -37,12 +47,6 @@
 
         <!-- Event listeners -->
 
-        <service id="api.listener.request.resource_type" class="Dunglas\ApiBundle\EventListener\ResourceTypeRequestListener">
-            <argument type="service" id="api.resource_collection" />
-
-            <tag name="kernel.event_listener" event="kernel.request" method="onKernelRequest" />
-        </service>
-
         <service id="api.listener.request.format" class="Dunglas\ApiBundle\EventListener\FormatRequestListener">
             <argument type="service" id="api.format_negotiator" />
             <argument>%api.supported_formats%</argument>
@@ -50,7 +54,8 @@
             <tag name="kernel.event_listener" event="kernel.request" method="onKernelRequest" />
         </service>
 
-        <service id="api.listener.view.validation" class="Dunglas\ApiBundle\EventListener\ValidationViewListener">
+        <service id="api.listener.view.validation" class="Dunglas\ApiBundle\Bridge\Symfony\Validator\EventListener\ViewListener">
+            <argument type="service" id="api.metadata.resource.factory.item" />
             <argument type="service" id="validator" />
 
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="20" />
@@ -77,10 +82,6 @@
 
         <service id="api.action.delete_item" class="Dunglas\ApiBundle\Action\DeleteItemAction">
             <argument type="service" id="api.data_provider" />
-        </service>
-
-        <service id="api.resource_resolver" class="Dunglas\ApiBundle\Api\ResourceResolver">
-            <argument type="service" id="api.resource_collection" />
         </service>
 
     </services>

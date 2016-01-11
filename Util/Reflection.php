@@ -14,6 +14,8 @@ namespace Dunglas\ApiBundle\Util;
 /**
  * Reflection utilities.
  *
+ * @internal
+ *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
 class Reflection

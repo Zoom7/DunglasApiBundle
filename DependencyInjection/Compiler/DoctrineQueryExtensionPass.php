@@ -18,6 +18,8 @@ use Symfony\Component\DependencyInjection\Reference;
 /**
  * Injects query extensions.
  *
+ * @internal
+ *
  * @author Samuel ROZE <samuel.roze@gmail.com>
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
@@ -29,12 +31,9 @@ final class DoctrineQueryExtensionPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         $dataProviderDefinition = $container->getDefinition('api.doctrine.orm.data_provider');
-        foreach ($this->findSortedServices($container, 'api.doctrine.orm.query_extension.item') as $extension) {
-            $dataProviderDefinition->addMethodCall('addItemExtension', [$extension]);
-        }
-        foreach ($this->findSortedServices($container, 'api.doctrine.orm.query_extension.collection') as $extension) {
-            $dataProviderDefinition->addMethodCall('addCollectionExtension', [$extension]);
-        }
+
+        $dataProviderDefinition->replaceArgument(4, $this->findSortedServices($container, 'api.doctrine.orm.query_extension.collection'));
+        $dataProviderDefinition->replaceArgument(5, $this->findSortedServices($container, 'api.doctrine.orm.query_extension.item'));
     }
 
     /**

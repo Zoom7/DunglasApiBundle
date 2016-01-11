@@ -12,6 +12,7 @@
 namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
+use Dunglas\ApiBundle\Api\FilterCollection;
 use Dunglas\ApiBundle\Doctrine\Orm\Filter\FilterInterface;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 
@@ -29,14 +30,14 @@ final class FilterExtension implements QueryCollectionExtensionInterface
     private $itemMetadataFactory;
 
     /**
-     * @var FilterInterface[]
+     * @var FilterCollection
      */
     private $filters;
 
-    public function __construct(array $filters, ItemMetadataFactoryInterface $itemMetadataFactory)
+    public function __construct(ItemMetadataFactoryInterface $itemMetadataFactory, FilterCollection $filters)
     {
-        $this->filters = $filters;
         $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->filters = $filters;
     }
 
     /**
@@ -45,10 +46,14 @@ final class FilterExtension implements QueryCollectionExtensionInterface
     public function applyToCollection(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
-        $filterClasses = $itemMetadata->getCollectionOperationAttribute($operationName, 'filters', [], true);
+        $resourceFilters = $itemMetadata->getCollectionOperationAttribute($operationName, 'filters', [], true);
 
-        foreach ($this->filters as $filter) {
-            if ($filter instanceof FilterInterface && in_array(get_class($filter), $filterClasses)) {
+        if (empty($resourceFilters)) {
+            return;
+        }
+
+        foreach ($this->filters as $filterName => $filter) {
+            if (isset($resourceFilters[$filterName]) && $filter instanceof FilterInterface) {
                 $filter->apply($queryBuilder, $resourceClass, $operationName);
             }
         }

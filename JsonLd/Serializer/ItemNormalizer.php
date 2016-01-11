@@ -16,7 +16,6 @@ use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Dunglas\ApiBundle\Exception\RuntimeException;
 use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
-use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata as ResourceItemMetadata;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\ItemMetadata as PropertyItemMetadata;
 use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface as PropertyCollectionMetadataFactoryInterface;
@@ -122,17 +121,11 @@ final class ItemNormalizer extends AbstractNormalizer
             return $this->handleCircularReference($object);
         }
 
-        $resourceClass = $this->getResourceClass($object, $context);
-
-        $data = [];
-        if (!isset($context['jsonld_has_context'])) {
-            $data['@context'] = isset($context['jsonld_embed_context']) ? $this->contextBuilder->getResourceContext($resourceClass) : $this->contextBuilder->getResourceContextUri($resourceClass);
-        }
-
-        $context = $this->createContext($resourceClass, $context);
-
+        $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
         $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
-        $propertyNames = $this->propertyCollectionMetadataFactory->create($resourceClass, $this->getPropertyCollectionFactoryContext($resourceItemMetadata, $context));
+        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
+        $data = $this->addJsonLdContext($this->contextBuilder, $resourceClass, $context);
+        $propertyNames = $this->propertyCollectionMetadataFactory->create($resourceClass, $this->getPropertyCollectionFactoryContext($context));
 
         $data['@id'] = $this->iriConverter->getIriFromItem($object);
         $data['@type'] = ($iri = $resourceItemMetadata->getIri()) ? $iri : $resourceClass->getShortName();
@@ -205,12 +198,12 @@ final class ItemNormalizer extends AbstractNormalizer
             throw new RuntimeException('The serializer must implement the DenormalizerInterface to denormalize relations.');
         }
 
-        $resourceClass = $this->getResourceClass($data, $context);
+        $resourceClass = $this->getResourceClass($this->resourceClassResolver, $data, $context);
         $normalizedData = $this->prepareForDenormalization($data);
 
-        $context = $this->createContext($resourceClass, $context);
         $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
-        $propertyNames = $this->propertyCollectionMetadataFactory->create($resourceClass, $this->getPropertyCollectionFactoryContext($resourceItemMetadata, $context, false));
+        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, false);
+        $propertyNames = $this->propertyCollectionMetadataFactory->create($resourceClass, $this->getPropertyCollectionFactoryContext($context));
 
         $allowedAttributes = [];
         foreach ($propertyNames as $propertyName) {
@@ -231,10 +224,10 @@ final class ItemNormalizer extends AbstractNormalizer
         $instanceClass = $overrideClass ? get_class($context['object_to_populate']) : $class;
         $reflectionClass = new \ReflectionClass($instanceClass);
         if ($reflectionClass->isAbstract()) {
-            throw new InvalidArgumentException(sprintf('Cannot create an instance of %s from serialized data because it is an abstract resource', $instanceClass));
+            throw new InvalidArgumentException(sprintf('Cannot create an instance of %s from serialized data because it is an abstract resource.', $instanceClass));
         }
 
-        $object = $this->instantiateObject($normalizedData, $instanceClass, $context, $reflectionClass, $allowedAttributes);
+        $object = $this->instantiateObject($normalizedData, $instanceClass, $context, $reflectionClass, array_keys($allowedAttributes));
 
         foreach ($normalizedData as $attributeName => $attributeValue) {
             // Ignore JSON-LD special attributes
@@ -338,14 +331,8 @@ final class ItemNormalizer extends AbstractNormalizer
      *
      * @throws InvalidArgumentException
      */
-    private function denormalizeRelation(
-        string $resourceClass,
-        $attributeName,
-        PropertyItemMetadata $propertyItemMetadata,
-        string $className,
-        $value,
-        array $context
-    ) {
+    private function denormalizeRelation(string $resourceClass, string $attributeName, PropertyItemMetadata $propertyItemMetadata, string $className, $value, array $context)
+    {
         if (!$this->resourceClassResolver->isResourceClass($className) || !$propertyItemMetadata->isWritableLink()) {
             return $this->serializer->denormalize($value, $className, self::FORMAT, $this->createRelationContext($resourceClass, $context));
         }
@@ -378,7 +365,7 @@ final class ItemNormalizer extends AbstractNormalizer
      * @param string $attributeName
      * @param mixed  $value
      */
-    private function setValue($object, $attributeName, $value)
+    private function setValue($object, string $attributeName, $value)
     {
         try {
             $this->propertyAccessor->setValue($object, $attributeName, $value);
@@ -392,43 +379,16 @@ final class ItemNormalizer extends AbstractNormalizer
      *
      * @see https://github.com/symfony/symfony/blob/master/src/Symfony/Component/PropertyInfo/Extractor/SerializerExtractor.php
      *
-     * @param ResourceItemMetadata $resourceItemMetadata
      * @param array $context
-     * @param bool $normalization
      *
      * @return array
      */
-    private function getPropertyCollectionFactoryContext(ResourceItemMetadata $resourceItemMetadata, array $context, bool $normalization) : array
+    private function getPropertyCollectionFactoryContext(array $context) : array
     {
-        $key = $normalization ? 'normalization_groups' : 'denormalization_groups';
-
-        $value = $this->getPropertyCollectionFactoryContextValue($resourceItemMetadata, $context, $key);
-        if ($value) {
-            return ['serializer_groups' => $value];
+        if ($context['groups']) {
+            return ['serializer_groups' => $context['groups']];
         }
 
         return [];
-    }
-
-    private function getPropertyCollectionFactoryContextValue(ResourceItemMetadata $resourceItemMetadata, array $context, string $key)
-    {
-        if (isset($context[$key])) {
-            return $context[$key];
-        }
-
-        if (isset($context['collection_operation'])) {
-            return $resourceItemMetadata->getCollectionOperationAttribute($context['collection_operation'], $key, null, true);
-        }
-
-        if (isset($context['item_operation'])) {
-            return $resourceItemMetadata->getCollectionOperationAttribute($context['item_operation'], $key, null, true);
-        }
-
-        return $resourceItemMetadata->getAttribute('validation_groups');
-    }
-
-    private function getResourceClass($data, array $context) : string
-    {
-        return $this->resourceClassResolver->getResourceClass($data, $context['resource_class'] ?? null, true);
     }
 }

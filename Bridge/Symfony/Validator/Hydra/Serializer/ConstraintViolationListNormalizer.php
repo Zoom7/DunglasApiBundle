@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Hydra\Serializer;
+namespace Dunglas\ApiBundle\Bridge\Symfony\Validator\Hydra\Serializer;
 
-use Symfony\Component\Routing\RouterInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
@@ -20,18 +20,18 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ConstraintViolationListNormalizer implements NormalizerInterface
+final class ConstraintViolationListNormalizer implements NormalizerInterface
 {
     const FORMAT = 'hydra-error';
 
     /**
-     * @var RouterInterface
+     * @var UrlGeneratorInterface
      */
-    private $router;
+    private $urlGenerator;
 
-    public function __construct(RouterInterface $router)
+    public function __construct(UrlGeneratorInterface $urlGenerator)
     {
-        $this->router = $router;
+        $this->urlGenerator = $urlGenerator;
     }
     /**
      * {@inheritdoc}
@@ -39,24 +39,25 @@ class ConstraintViolationListNormalizer implements NormalizerInterface
     public function normalize($object, $format = null, array $context = [])
     {
         $violations = [];
-        if ($object instanceof ConstraintViolationListInterface) {
-            $message = '';
+        $message = '';
 
-            foreach ($object as $violation) {
-                $violations[] = [
-                    'propertyPath' => $violation->getPropertyPath(),
-                    'message' => $violation->getMessage(),
-                ];
+        foreach ($object as $violation) {
+            $violations[] = [
+                'propertyPath' => $violation->getPropertyPath(),
+                'message' => $violation->getMessage(),
+            ];
 
-                $message .= ($violation->getPropertyPath() ? $violation->getPropertyPath().': ' : '').$violation->getMessage()."\n";
-            }
+            $propertyPath = $violation->getPropertyPath();
+            $prefix = $propertyPath ? srpintf('%s: ', $propertyPath) : '';
+
+            $message .= $prefix.$violation->getMessage()."\n";
         }
 
         return [
-            '@context' => $this->router->generate('api_jsonld_context', ['shortName' => 'ConstraintViolationList']),
+            '@context' => $this->urlGenerator->generate('api_jsonld_context', ['shortName' => 'ConstraintViolationList']),
             '@type' => 'ConstraintViolationList',
-            'hydra:title' => isset($context['title']) ? $context['title'] : 'An error occurred',
-            'hydra:description' => isset($message) ? $message : (string) $object,
+            'hydra:title' => $context['title'] ?? 'An error occurred',
+            'hydra:description' => $message ?? (string) $object,
             'violations' => $violations,
         ];
     }

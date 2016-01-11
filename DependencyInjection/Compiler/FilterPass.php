@@ -16,29 +16,30 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Injects data managers in the chain.
+ * Injects filters.
+ *
+ * @internal
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class DataProviderPass implements CompilerPassInterface
+final class FilterPass implements CompilerPassInterface
 {
     /**
      * {@inheritdoc}
      */
     public function process(ContainerBuilder $container)
     {
-        $sortedServices = [];
-        foreach ($container->findTaggedServiceIds('api.data_provider') as $serviceId => $tags) {
+        $filters = [];
+        foreach ($container->findTaggedServiceIds('api.filter') as $serviceId => $tags) {
             foreach ($tags as $tag) {
-                $priority = isset($tag['priority']) ? $tag['priority'] : 0;
-                $sortedServices[$priority][] = new Reference($serviceId);
+                if (!isset($tag['name'])) {
+                    throw new \RuntimeException('Filter tags must have a "name" property.');
+                }
+
+                $filters[$tag['name']] = new Reference($serviceId);
             }
         }
-        krsort($sortedServices);
 
-        // Flatten the array
-        $dataProviders = call_user_func_array('array_merge', $sortedServices);
-
-        $container->getDefinition('api.data_provider')->addArgument($dataProviders);
+        $container->getDefinition('api.filters')->addArgument($filters);
     }
 }

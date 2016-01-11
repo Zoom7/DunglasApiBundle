@@ -11,35 +11,63 @@
 
 namespace Dunglas\ApiBundle\Hydra;
 
-use Dunglas\ApiBundle\Api\Operation\OperationInterface;
-use Dunglas\ApiBundle\Api\ResourceTypeRegistryInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\JsonLd\ContextBuilder;
+use Dunglas\ApiBundle\Api\OperationMethodResolverInterface;
+use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
-use Dunglas\ApiBundle\Mapping\AttributeMetadataInterface;
-use Symfony\Component\Routing\RouterInterface;
+use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata as ResourceItemMetadata;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface as ResourceCollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface as PropertyCollectionMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface as PropertyItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Property\ItemMetadata as PropertyItemMetadata;
 
+/**
+ * Creates a machine readable Hydra API documentation.
+ *
+ * @author Kévin Dunglas <dunglas@gmail.com>
+ */
 class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
 {
     /**
-     * @var ResourceCollectionInterface
+     * @var ResourceCollectionMetadataFactoryInterface
      */
-    private $resourceCollection;
+    private $resourceCollectionMetadataFactory;
 
     /**
-     * @var ContextBuilder
+     * @var ResourceItemMetadataFactoryInterface
+     */
+    private $resourceItemMetadataFactory;
+
+    /**
+     * @var PropertyCollectionMetadataFactoryInterface
+     */
+    private $propertyCollectionMetadataFactory;
+
+    /**
+     * @var PropertyItemMetadataFactoryInterface
+     */
+    private $propertyItemMetadataFactory;
+
+    /**
+     * @var ContextBuilderInterface
      */
     private $contextBuilder;
 
     /**
-     * @var RouterInterface
+     * @var ResourceClassResolverInterface
      */
-    private $router;
+    private $resourceClassResolver;
 
     /**
-     * @var ClassMetadataFactoryInterface
+     * @var OperationMethodResolverInterface
      */
-    private $classMetadataFactory;
+    private $operationMethodResolver;
+
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
 
     /**
      * @var string
@@ -51,19 +79,16 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
      */
     private $description;
 
-    /**
-     * @param ResourceCollectionInterface   $resourceCollection
-     * @param ContextBuilder                $contextBuilder
-     * @param RouterInterface               $router
-     * @param ClassMetadataFactoryInterface $classMetadataFactory
-     * @param string                        $title
-     * @param string                        $description
-     */
-    public function __construct(ResourceTypeRegistryInterface $resourceCollection, ContextBuilderInterface $contextBuilder, RouterInterface $router, ClassMetadataFactoryInterface $classMetadataFactory, string $title, string $description) {
-        $this->resourceCollection = $resourceCollection;
+    public function __construct(ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory, ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceClassResolver, OperationMethodResolverInterface $operationMethodResolver, UrlGeneratorInterface $urlGenerator, string $title, string $description)
+    {
+        $this->resourceCollectionMetadataFactory = $resourceCollectionMetadataFactory;
+        $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
+        $this->propertyCollectionMetadataFactory = $propertyCollectionMetadataFactory;
+        $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
         $this->contextBuilder = $contextBuilder;
-        $this->router = $router;
-        $this->classMetadataFactory = $classMetadataFactory;
+        $this->resourceClassResolver = $resourceClassResolver;
+        $this->operationMethodResolver = $operationMethodResolver;
+        $this->urlGenerator = $urlGenerator;
         $this->title = $title;
         $this->description = $description;
     }
@@ -76,20 +101,17 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
         $classes = [];
         $entrypointProperties = [];
 
-        foreach ($this->resourceCollection as $resource) {
-            $classMetadata = $this->classMetadataFactory->getMetadataFor(
-                $resource->getEntityClass(),
-                $resource->getNormalizationGroups(),
-                $resource->getDenormalizationGroups(),
-                $resource->getValidationGroups()
-            );
+        foreach ($this->resourceCollectionMetadataFactory->create() as $resourceClass) {
+            $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
 
-            $shortName = $resource->getShortName();
-            $prefixedShortName = ($iri = $classMetadata->getIri()) ? $iri : '#'.$shortName;
+            $shortName = $resourceItemMetadata->getShortName();
+            $prefixedShortName = ($iri = $resourceItemMetadata->getIri()) ? $iri : '#'.$shortName;
 
             $collectionOperations = [];
-            foreach ($resource->getCollectionOperations() as $collectionOperation) {
-                $collectionOperations[] = $this->getHydraOperation($resource, $collectionOperation, $prefixedShortName, true);
+            if ($itemOperations = $resourceItemMetadata->getCollectionOperations()) {
+                foreach ($itemOperations as $collectionOperation) {
+                    $collectionOperations[] = $this->getHydraOperation($resourceClass, $resourceItemMetadata, $collectionOperation, $prefixedShortName, true);
+                }
             }
 
             if (!empty($collectionOperations)) {
@@ -112,23 +134,23 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
             $class = [
                 '@id' => $prefixedShortName,
                 '@type' => 'hydra:Class',
-                'rdfs:label' => $resource->getShortName(),
-                'hydra:title' => $resource->getShortName(),
-                'hydra:description' => $classMetadata->getDescription(),
+                'rdfs:label' => $shortName,
+                'hydra:title' => $shortName,
             ];
 
-            if ($description = $classMetadata->getDescription()) {
+            if ($description = $resourceItemMetadata->getDescription()) {
                 $class['hydra:description'] = $description;
             }
 
             $properties = [];
-            $identifierName = $classMetadata->getIdentifierName();
-            foreach ($classMetadata->getAttributesMetadata() as $attributeName => $attributeMetadata) {
-                if ($identifierName === $attributeName && !$attributeMetadata->isWritable()) {
+            foreach ($this->propertyCollectionMetadataFactory->create($resourceClass) as $propertyName) {
+                $propertyItemMetadata = $this->propertyItemMetadataFactory->create($propertyName);
+
+                if ($propertyItemMetadata->isIdentifier() && !$propertyItemMetadata->isWritable()) {
                     continue;
                 }
 
-                if ($attributeMetadata->isNormalizationLink()) {
+                if ($propertyItemMetadata->isReadableLink()) {
                     $type = 'Hydra:Link';
                 } else {
                     $type = 'rdf:Property';
@@ -137,22 +159,22 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                 $property = [
                     '@type' => 'hydra:SupportedProperty',
                     'hydra:property' => [
-                        '@id' => ($iri = $attributeMetadata->getIri()) ? $iri : sprintf('#%s/%s', $shortName, $attributeName),
+                        '@id' => ($iri = $propertyItemMetadata->getIri()) ? $iri : sprintf('#%s/%s', $shortName, $propertyName),
                         '@type' => $type,
-                        'rdfs:label' => $attributeName,
+                        'rdfs:label' => $propertyName,
                         'domain' => $prefixedShortName,
                     ],
-                    'hydra:title' => $attributeName,
-                    'hydra:required' => $attributeMetadata->isRequired(),
-                    'hydra:readable' => $identifierName === $attributeName ? false : $attributeMetadata->isReadable(),
-                    'hydra:writable' => $attributeMetadata->isWritable(),
+                    'hydra:title' => $propertyName,
+                    'hydra:required' => $propertyItemMetadata->isRequired(),
+                    'hydra:readable' => $propertyItemMetadata->isReadable(),
+                    'hydra:writable' => $propertyItemMetadata->isWritable(),
                 ];
 
-                if ($range = $this->getRange($attributeMetadata)) {
+                if ($range = $this->getRange($propertyItemMetadata)) {
                     $property['hydra:property']['range'] = $range;
                 }
 
-                if ($description = $attributeMetadata->getDescription()) {
+                if ($description = $propertyItemMetadata->getDescription()) {
                     $property['hydra:description'] = $description;
                 }
 
@@ -160,12 +182,15 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
             }
             $class['hydra:supportedProperty'] = $properties;
 
-            $operations = [];
-            foreach ($resource->getItemOperations() as $itemOperation) {
-                $operations[] = $this->getHydraOperation($resource, $itemOperation, $prefixedShortName, false);
+            $itemOperations = [];
+
+            if ($operations = $resourceItemMetadata->getItemOperations()) {
+                foreach ($operations as $itemOperation) {
+                    $itemOperations[] = $this->getHydraOperation($resourceClass, $itemOperation, $prefixedShortName, false);
+                }
             }
 
-            $class['hydra:supportedOperation'] = $operations;
+            $class['hydra:supportedOperation'] = $itemOperations;
             $classes[] = $class;
         }
 
@@ -246,39 +271,33 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
 
         return [
             '@context' => $this->getContext(),
-            '@id' => $this->router->generate('api_hydra_vocab'),
+            '@id' => $this->urlGenerator->generate('api_hydra_vocab'),
             'hydra:title' => $this->title,
             'hydra:description' => $this->description,
-            'hydra:entrypoint' => $this->router->generate('api_jsonld_entrypoint'),
+            'hydra:entrypoint' => $this->urlGenerator->generate('api_jsonld_entrypoint'),
             'hydra:supportedClass' => $classes,
         ];
     }
 
     /**
      * Gets and populates if applicable a Hydra operation.
-     *
-     * @param ResourceInterface  $resource
-     * @param OperationInterface $operation
-     * @param string             $prefixedShortName
-     * @param bool               $collection
-     *
-     * @return array
      */
-    private function getHydraOperation(ResourceInterface $resource, OperationInterface $operation, $prefixedShortName, $collection)
+    private function getHydraOperation(string $resourceClass, ResourceItemMetadata $resourceItemMetadata, string $operationName, array $operation, string $prefixedShortName, bool $collection) : array
     {
-        $method = $operation->getRoute()->getMethods();
-        if (is_array($method)) {
-            // If all methods are allowed, default to GET
-            $method = isset($method[0]) ? $method[0] : 'GET';
+        if ($collection) {
+            $method = $this->operationMethodResolver->getCollectionOperationMethod($resourceClass, $operationName);
+        } else {
+            $method = $this->operationMethodResolver->getItemOperationMethod($resourceClass, $operationName);
         }
 
-        $hydraOperation = $operation->getContext();
+        $hydraOperation = $operation['hydra_context'] ?? [];
+        $shortName = $resourceItemMetadata->getShortName();
 
         switch ($method) {
             case 'GET':
                 if ($collection) {
                     if (!isset($hydraOperation['hydra:title'])) {
-                        $hydraOperation['hydra:title'] = sprintf('Retrieves the collection of %s resources.', $resource->getShortName());
+                        $hydraOperation['hydra:title'] = sprintf('Retrieves the collection of %s resources.', $shortName);
                     }
 
                     if (!isset($hydraOperation['returns'])) {
@@ -286,7 +305,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                     }
                 } else {
                     if (!isset($hydraOperation['hydra:title'])) {
-                        $hydraOperation['hydra:title'] = sprintf('Retrieves %s resource.', $resource->getShortName());
+                        $hydraOperation['hydra:title'] = sprintf('Retrieves %s resource.', $shortName);
                     }
                 }
             break;
@@ -297,7 +316,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                 }
 
                 if (!isset($hydraOperation['hydra:title'])) {
-                    $hydraOperation['hydra:title'] = sprintf('Creates a %s resource.', $resource->getShortName());
+                    $hydraOperation['hydra:title'] = sprintf('Creates a %s resource.', $shortName);
                 }
             break;
 
@@ -307,13 +326,13 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                 }
 
                 if (!isset($hydraOperation['hydra:title'])) {
-                    $hydraOperation['hydra:title'] = sprintf('Replaces the %s resource.', $resource->getShortName());
+                    $hydraOperation['hydra:title'] = sprintf('Replaces the %s resource.', $shortName);
                 }
                 break;
 
             case 'DELETE':
                 if (!isset($hydraOperation['hydra:title'])) {
-                    $hydraOperation['hydra:title'] = sprintf('Deletes the %s resource.', $resource->getShortName());
+                    $hydraOperation['hydra:title'] = sprintf('Deletes the %s resource.', $shortName);
                 }
 
                 if (!isset($hydraOperation['returns'])) {
@@ -357,22 +376,22 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
     /**
      * Gets the range of the property.
      *
-     * @param AttributeMetadataInterface $attributeMetadata
+     * @param PropertyItemMetadata $propertyItemMetadata
      *
      * @return string|null
      */
-    private function getRange(AttributeMetadataInterface $attributeMetadata)
+    private function getRange(PropertyItemMetadata $propertyItemMetadata)
     {
-        $type = $attributeMetadata->getType();
+        $type = $propertyItemMetadata->getType();
         if (!$type) {
-            return;
+            return null;
         }
 
-        if ($type->isCollection() && $collectionType = $type->getCollectionType()) {
+        if ($type->isCollection() && $collectionType = $type->getCollectionValueType()) {
             $type = $collectionType;
         }
 
-        switch ($type->getType()) {
+        switch ($type->getBuiltinType()) {
             case 'string':
                 return 'xmls:string';
 
@@ -386,19 +405,21 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                 return 'xmls:boolean';
 
             case 'object':
-                $class = $type->getClass();
+                $className = $type->getClassName();
 
-                if ($class) {
-                    if ('DateTime' === $class) {
+                if ($className) {
+                    if ('DateTime' === $className) {
                         return 'xmls:dateTime';
                     }
 
-                    if ($resource = $this->resourceCollection->getResourceForEntity($type->getClass())) {
+                    if ($resource = $this->resourceClassResolver->isResourceClass($type->getClassName())) {
                         return sprintf('#%s', $resource->getShortName());
                     }
                 }
             break;
         }
+
+        return null;
     }
 
     /**
@@ -406,15 +427,15 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
      *
      * @return array
      */
-    private function getContext()
+    private function getContext() : array
     {
         return array_merge(
-            $this->contextBuilder->getContext(),
+            $this->contextBuilder->getBaseContext(),
             [
-                'rdf' => ContextBuilder::RDF_NS,
-                'rdfs' => ContextBuilder::RDFS_NS,
-                'xmls' => ContextBuilder::XML_NS,
-                'owl' => ContextBuilder::OWL_NS,
+                'rdf' => ContextBuilderInterface::RDF_NS,
+                'rdfs' => ContextBuilderInterface::RDFS_NS,
+                'xmls' => ContextBuilderInterface::XML_NS,
+                'owl' => ContextBuilderInterface::OWL_NS,
                 'domain' => ['@id' => 'rdfs:domain', '@type' => '@id'],
                 'range' => ['@id' => 'rdfs:range', '@type' => '@id'],
                 'subClassOf' => ['@id' => 'rdfs:subClassOf', '@type' => '@id'],

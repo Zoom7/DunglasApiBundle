@@ -37,16 +37,10 @@ final class PutItemAction
      */
     private $serializer;
 
-    /**
-     * @var ItemMetadataFactoryInterface
-     */
-    private $itemMetadataFactory;
-
-    public function __construct(DataProviderInterface $dataProvider, SerializerInterface $serializer, ItemMetadataFactoryInterface $itemMetadataFactory)
+    public function __construct(DataProviderInterface $dataProvider, SerializerInterface $serializer)
     {
         $this->dataProvider = $dataProvider;
         $this->serializer = $serializer;
-        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -64,17 +58,8 @@ final class PutItemAction
     {
         list($resourceClass, , $operationName, $format) = $this->extractAttributes($request);
         $data = $this->getItem($this->dataProvider, $resourceClass, $id, $operationName);
-        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
 
-        $context = $itemMetadata->getItemOperationAttribute($operationName, 'denormalization_context', [], true);
-
-        $data = $this->serializer->deserialize(
-            $request->getContent(),
-            $resourceClass,
-            $format,
-            $context + ['object_to_populate' => $data]
-        );
-
-        return $data;
+        $context = ['object_to_populate' => $data, 'resource_class' => $resourceClass, 'item_operation_name' => $operationName];
+        return $this->serializer->deserialize($request->getContent(), $resourceClass, $format, $context);
     }
 }

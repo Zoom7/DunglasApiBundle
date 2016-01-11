@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm\Filter;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
@@ -18,6 +18,7 @@ use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryNameGenerator;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
@@ -53,6 +54,11 @@ class SearchFilter extends AbstractFilter
     const STRATEGY_WORD_START = 'word_start';
 
     /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
      * @var IriConverterInterface
      */
     private $iriConverter;
@@ -62,10 +68,6 @@ class SearchFilter extends AbstractFilter
      */
     private $propertyAccessor;
 
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
 
     /**
      * @param ManagerRegistry           $managerRegistry
@@ -74,18 +76,13 @@ class SearchFilter extends AbstractFilter
      * @param PropertyAccessorInterface $propertyAccessor
      * @param array|null                $properties       Null to allow filtering on all properties with the exact strategy or a map of property name with strategy.
      */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        RequestStack $requestStack,
-        IriConverterInterface $iriConverter,
-        PropertyAccessorInterface $propertyAccessor,
-        array $properties = null
-    ) {
+    public function __construct(ManagerRegistry $managerRegistry, RequestStack $requestStack, IriConverterInterface $iriConverter, PropertyAccessorInterface $propertyAccessor = null, array $properties = null)
+    {
         parent::__construct($managerRegistry, $properties);
 
-        $this->iriConverter = $iriConverter;
-        $this->propertyAccessor = $propertyAccessor;
         $this->requestStack = $requestStack;
+        $this->iriConverter = $iriConverter;
+        $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
     }
 
     /**

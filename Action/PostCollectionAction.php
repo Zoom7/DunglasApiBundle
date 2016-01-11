@@ -30,15 +30,9 @@ final class PostCollectionAction
      */
     private $serializer;
 
-    /**
-     * @var ItemMetadataFactoryInterface
-     */
-    private $itemMetadataFactory;
-
-    public function __construct(SerializerInterface $serializer, ItemMetadataFactoryInterface $itemMetadataFactory)
+    public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
-        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -53,13 +47,8 @@ final class PostCollectionAction
     public function __invoke(Request $request)
     {
         list($resourceClass, $operationName, , $format) = $this->extractAttributes($request);
-        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+        $context = ['resource_class' => $resourceClass, 'collection_operation_name' => $operationName];
 
-        return $this->serializer->deserialize(
-            $request->getContent(),
-            $resourceClass,
-            $format,
-            $itemMetadata->getCollectionOperationAttribute($operationName, 'denormalization_context', [], true)
-        );
+        return $this->serializer->deserialize($request->getContent(), $resourceClass, $format, $context);
     }
 }

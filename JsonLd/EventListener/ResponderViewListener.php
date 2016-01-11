@@ -9,10 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel\JsonLd;
+namespace Dunglas\ApiBundle\JsonLd\EventListener;
 
-use Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation\JsonLd\Response as JsonLdResponse;
-use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\JsonLd\Response as JsonLdResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
@@ -32,15 +31,9 @@ final class ResponderViewListener
      */
     private $normalizer;
 
-    /**
-     * @var ItemMetadataFactoryInterface
-     */
-    private $itemMetadataFactory;
-
-    public function __construct(NormalizerInterface $normalizer, ItemMetadataFactoryInterface $itemMetadataFactory)
+    public function __construct(NormalizerInterface $normalizer)
     {
         $this->normalizer = $normalizer;
-        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -89,25 +82,14 @@ final class ResponderViewListener
             return;
         }
 
-        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
-
+        $context = ['request_uri' => $request->getRequestUri(), 'resource_class' => $resourceClass];
         if ($collectionOperationName) {
-            $context = $itemMetadata->getCollectionOperationAttribute($collectionOperationName, 'normalization_context');
+            $context['collection_operation_name'] = $collectionOperationName;
         } else {
-            $context = $itemMetadata->getItemOperationAttribute($itemOperationName, 'normalization_context');
+            $context['item_operation_name'] = $itemOperationName;
         }
 
-        if (!isset($context)) {
-            $context = isset($itemMetadata->getAttributes()['normalization_context']) ? $itemMetadata->getAttributes()['normalization_context'] : [];
-        }
-
-        $response = new JsonLdResponse(
-            $this->normalizer->normalize(
-                $controllerResult, self::FORMAT, $context + ['request_uri' => $request->getRequestUri()]
-            ),
-            $status
-        );
-
+        $response = new JsonLdResponse($this->normalizer->normalize($controllerResult, self::FORMAT, $context), $status);
         $event->setResponse($response);
     }
 }

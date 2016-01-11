@@ -9,9 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Symfony\HttpFoundation;
+namespace Dunglas\ApiBundle\Util;
 
-use Dunglas\ApiBundle\Util\string;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

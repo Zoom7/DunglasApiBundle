@@ -12,9 +12,11 @@
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
 use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Api\ResourceClassResolver;
-use Dunglas\ApiBundle\Model\PaginatorInterface;
+use Dunglas\ApiBundle\Api\PaginatorInterface;
+use Dunglas\ApiBundle\Exception\InvalidArgumentException;
+use Dunglas\ApiBundle\Exception\RuntimeException;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -23,31 +25,38 @@ use Symfony\Component\Serializer\SerializerInterface;
  * Enhance the result of collection by enabling pagination.
  *
  * @author Samuel ROZE <samuel.roze@gmail.com>
+ * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements NormalizerInterface
+class PagedCollectionNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
 {
-    /**
-     * @var string
-     */
     const HYDRA_PAGED_COLLECTION = 'hydra:PagedCollection';
 
     /**
-     * @var CollectionNormalizer
+     * @var NormalizerInterface
      */
     private $collectionNormalizer;
+
+    /**
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
     /**
      * @var ResourceClassResolverInterface
      */
     private $resourceResolver;
 
     /**
-     * @param NormalizerInterface $collectionNormalizer
-     * @param ResourceClassResolverInterface $resourceResolver
+     * @var string
      */
-    public function __construct(NormalizerInterface $collectionNormalizer, ResourceClassResolverInterface $resourceResolver)
+    private $pageParameterName;
+
+    public function __construct(NormalizerInterface $collectionNormalizer, ItemMetadataFactoryInterface $itemMetadataFactory, ResourceClassResolverInterface $resourceResolver, string $pageParameterName)
     {
         $this->collectionNormalizer = $collectionNormalizer;
+        $this->itemMetadataFactory = $itemMetadataFactory;
         $this->resourceResolver = $resourceResolver;
+        $this->pageParameterName = $pageParameterName;
     }
 
     /**
@@ -60,8 +69,16 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
             return $data;
         }
 
-        $resource = $this->resourceResolver->getResourceClass($object, $context);
-        list($parts, $parameters) = $this->parseRequestUri($resource, $context['request_uri']);
+        $resourceClass = $this->resourceResolver->getResourceClass($object, $context);
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+
+        if (isset($context['collection_operation_name'])) {
+            $pageParameterName = $itemMetadata->getCollectionOperationAttribute($context['collection_operation_name'], 'pagination_page_parameter', $this->pageParameterName, true);
+        } else {
+            $pageParameterName = $itemMetadata->getAttribute('pagination_page_parameter', $this->pageParameterName);
+        }
+
+        list($parts, $parameters) = $this->parseRequestUri($pageParameterName, $context['request_uri'] ?? '/');
 
         $data['@type'] = self::HYDRA_PAGED_COLLECTION;
 
@@ -70,19 +87,19 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
 
         if (1. !== $currentPage) {
             $previousPage = $currentPage - 1.;
-            $data['hydra:previousPage'] = $this->getPageUrl($resource, $parts, $parameters, $previousPage);
+            $data['hydra:previousPage'] = $this->getPageUrl($pageParameterName, $parts, $parameters, $previousPage);
         }
 
         if ($currentPage !== $lastPage) {
-            $data['hydra:nextPage'] = $this->getPageUrl($resource, $parts, $parameters, $currentPage + 1.);
+            $data['hydra:nextPage'] = $this->getPageUrl($pageParameterName, $parts, $parameters, $currentPage + 1.);
         }
 
         $data['hydra:totalItems'] = $object->getTotalItems();
         $data['hydra:itemsPerPage'] = $object->getItemsPerPage();
-        $data['hydra:firstPage'] = $this->getPageUrl($resource, $parts, $parameters, 1.);
-        $data['hydra:lastPage'] = $this->getPageUrl($resource, $parts, $parameters, $lastPage);
+        $data['hydra:firstPage'] = $this->getPageUrl($pageParameterName, $parts, $parameters, 1.);
+        $data['hydra:lastPage'] = $this->getPageUrl($pageParameterName, $parts, $parameters, $lastPage);
 
-        // Reorder the `hydra:member` key to the end
+        // Reorder the hydra:member key to the end
         $members = $data['hydra:member'];
         unset($data['hydra:member']);
         $data['hydra:member'] = $members;
@@ -91,18 +108,18 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
     }
 
     /**
-     * Parse and standardize the request URI.
+     * Parses and standardizes the request URI.
      *
-     * @param ResourceInterface $resource
-     * @param string            $requestUri
+     * @param string $pageParameterName
+     * @param string $requestUri
      *
      * @return array
      */
-    private function parseRequestUri(ResourceInterface $resource, $requestUri)
+    private function parseRequestUri(string $pageParameterName, string $requestUri) : array
     {
         $parts = parse_url($requestUri);
         if (false === $parts) {
-            throw new \InvalidArgumentException(sprintf('The request URI "%s" is malformed.', $requestUri));
+            throw new InvalidArgumentException(sprintf('The request URI "%s" is malformed.', $requestUri));
         }
 
         $parameters = [];
@@ -110,9 +127,7 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
             parse_str($parts['query'], $parameters);
 
             // Remove existing page parameter
-            if (isset($parameters[$resource->getPageParameter()])) {
-                unset($parameters[$resource->getPageParameter()]);
-            }
+            unset($parameters[$pageParameterName]);
         }
 
         return [$parts, $parameters];
@@ -121,17 +136,17 @@ class PaginatedCollectionEnhancer extends SerializerAwareNormalizer implements N
     /**
      * Gets a collection URL for the given page.
      *
-     * @param ResourceInterface $resource
-     * @param array             $parts
-     * @param array             $parameters
-     * @param float             $page
+     * @param string $pageParameterName
+     * @param array  $parts
+     * @param array  $parameters
+     * @param float  $page
      *
      * @return string
      */
-    private function getPageUrl(ResourceInterface $resource, array $parts, array $parameters, $page)
+    private function getPageUrl(string $pageParameterName, array $parts, array $parameters, float $page) : string
     {
         if (1. !== $page) {
-            $parameters[$resource->getPageParameter()] = $page;
+            $parameters[$pageParameterName] = $page;
         }
 
         $query = http_build_query($parameters, '', '&', PHP_QUERY_RFC3986);

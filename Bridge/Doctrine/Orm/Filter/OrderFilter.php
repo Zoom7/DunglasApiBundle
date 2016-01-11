@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Doctrine\Orm\Filter;
+namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
@@ -28,28 +28,18 @@ class OrderFilter extends AbstractFilter
     /**
      * @var string Keyword used to retrieve the value.
      */
-    private $orderParameter;
+    private $orderParameterName;
 
     /**
      * @var RequestStack
      */
     private $requestStack;
 
-    /**
-     * @param ManagerRegistry $managerRegistry
-     * @param RequestStack    $requestStack
-     * @param string          $orderParameter  Keyword used to retrieve the value.
-     * @param array|null      $properties      List of property names on which the filter will be enabled.
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        RequestStack $requestStack,
-        string $orderParameter,
-        array $properties = null
-    ) {
+    public function __construct(ManagerRegistry $managerRegistry, RequestStack $requestStack, string $orderParameterName, array $properties = null)
+    {
         parent::__construct($managerRegistry, $properties);
 
-        $this->orderParameter = $orderParameter;
+        $this->orderParameterName = $orderParameterName;
         $this->requestStack = $requestStack;
     }
 
@@ -122,7 +112,7 @@ class OrderFilter extends AbstractFilter
                 continue;
             }
 
-            $description[sprintf('%s[%s]', $this->orderParameter, $property)] = [
+            $description[sprintf('%s[%s]', $this->orderParameterName, $property)] = [
                 'property' => $property,
                 'type' => 'string',
                 'required' => false,
@@ -137,6 +127,6 @@ class OrderFilter extends AbstractFilter
      */
     protected function extractProperties(Request $request)
     {
-        return $request->query->get($this->orderParameter, []);
+        return $request->query->get($this->orderParameterName, []);
     }
 }

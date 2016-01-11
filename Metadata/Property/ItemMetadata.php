@@ -299,7 +299,7 @@ final class ItemMetadata
      *
      * @param bool $identifier
      *
-     * @return Metadata
+     * @return self
      */
     public function withIdentifier(bool $identifier) : self
     {

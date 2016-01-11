@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Exception;
+namespace Dunglas\ApiBundle\Bridge\Symfony\Validator\Exception;
 
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 

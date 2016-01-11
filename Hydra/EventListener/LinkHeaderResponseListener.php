@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel\Hydra;
+namespace Dunglas\ApiBundle\Hydra\EventListener;
 
-use DunglasApiBundle\Api\UrlGeneratorInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 

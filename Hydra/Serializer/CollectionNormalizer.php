@@ -11,11 +11,12 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
-use Dunglas\ApiBundle\Api\ResourceClassResolver;
 use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
+use Dunglas\ApiBundle\Exception\RuntimeException;
 use Dunglas\ApiBundle\JsonLd\ContextBuilder;
 use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
 use Dunglas\ApiBundle\JsonLd\Serializer\ContextTrait;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
 
@@ -25,33 +26,33 @@ use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
  * @author Kevin Dunglas <dunglas@gmail.com>
  * @author Samuel ROZE <samuel.roze@gmail.com>
  */
-class CollectionNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
+final class CollectionNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
 {
-    const FORMAT = 'jsonld';
-
     use ContextTrait;
 
-    /**
-     * @var string
-     */
+    const FORMAT = 'jsonld';
     const HYDRA_COLLECTION = 'hydra:Collection';
 
     /**
-     * @var ContextBuilder
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
+    /**
+     * @var ContextBuilderInterface
      */
     private $contextBuilder;
+
     /**
      * @var ResourceClassResolverInterface
      */
-    private $resourceResolver;
+    private $resourceClassResolver;
 
-    /**
-     * @param ContextBuilder $contextBuilder
-     */
-    public function __construct(ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceResolver)
+    public function __construct(ItemMetadataFactoryInterface $itemMetadataFactory, ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceClassResolver)
     {
+        $this->itemMetadataFactory = $itemMetadataFactory;
         $this->contextBuilder = $contextBuilder;
-        $this->resourceResolver = $resourceResolver;
+        $this->resourceClassResolver = $resourceClassResolver;
     }
 
     /**
@@ -65,27 +66,32 @@ class CollectionNormalizer extends SerializerAwareNormalizer implements Normaliz
     /**
      * {@inheritdoc}
      */
-    public function normalize($object, $format = null, array $context = array())
+    public function normalize($object, $format = null, array $context = [])
     {
-        $resource = $this->resourceResolver->getResourceClass($object, $context);
+        if (!$this->serializer instanceof NormalizerInterface) {
+            throw new RuntimeException('The serializer must implement the NormalizerInterface.');
+        }
 
         if (isset($context['jsonld_sub_level'])) {
             $data = [];
             foreach ($object as $index => $obj) {
                 $data[$index] = $this->serializer->normalize($obj, $format, $context);
             }
-        } else {
-            $context = $this->createContext($resource, $context);
-            $data = [
-                '@context' => $this->contextBuilder->getResourceContext($resource, $context),
-                '@id' => $context['request_uri'],
-                '@type' => self::HYDRA_COLLECTION,
-                'hydra:member' => [],
-            ];
 
-            foreach ($object as $obj) {
-                $data['hydra:member'][] = $this->serializer->normalize($obj, $format, $context);
-            }
+            return $data;
+        }
+
+        $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
+        $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
+        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
+        $data = $this->addJsonLdContext($this->contextBuilder, $resourceClass, $context);
+
+        $data['@id'] = $context['request_uri'];
+        $data['@type'] = self::HYDRA_COLLECTION;
+        $data['hydra:member'] = [];
+
+        foreach ($object as $obj) {
+            $data['hydra:member'][] = $this->serializer->normalize($obj, $format, $context);
         }
 
         return $data;

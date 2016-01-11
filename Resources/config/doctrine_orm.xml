@@ -5,28 +5,32 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <service id="api.data_provider" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\DataProvider" lazy="true" />
+
         <service id="api.doctrine.metadata_factory" class="Doctrine\Common\Persistence\Mapping\ClassMetadataFactory" public="false">
             <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />
         </service>
 
         <service id="api.doctrine.orm.data_provider" public="false" abstract="true">
             <argument type="service" id="doctrine" />
+            <argument type="service" id="api.metadata.property.factory.collection" />
+            <argument type="service" id="api.metadata.property.factory.item" />
+            <argument type="collection"></argument> <!-- query collection extensions -->
+            <argument type="collection"></argument> <!-- query item extensions -->
         </service>
 
-        <service id="api.doctrine.orm.default_data_provider" parent="api.doctrine.orm.data_provider" class="Dunglas\ApiBundle\Doctrine\Orm\DataProvider">
-            <tag name="api.data_provider" />
-        </service>
+        <service id="api.doctrine.orm.default_data_provider" parent="api.doctrine.orm.data_provider" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\DataProvider" />
 
         <!-- Filter -->
 
-        <service id="api.doctrine.orm.search_filter" class="Dunglas\ApiBundle\Doctrine\Orm\Filter\SearchFilter" public="false" abstract="true">
+        <service id="api.doctrine.orm.search_filter" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter\SearchFilter" public="false" abstract="true">
             <argument type="service" id="doctrine" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="api.iri_converter" />
             <argument type="service" id="api.property_accessor" />
         </service>
 
-        <service id="api.doctrine.orm.order_filter" class="Dunglas\ApiBundle\Doctrine\Orm\Filter\OrderFilter" public="false" abstract="true">
+        <service id="api.doctrine.orm.order_filter" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter\OrderFilter" public="false" abstract="true">
             <argument type="service" id="doctrine" />
             <argument type="service" id="request_stack" />
             <argument>%api.collection.filter_name.order%</argument>
@@ -39,14 +43,14 @@
 
         <!-- Metadata loader -->
 
-        <service id="api.doctrine.mapping.loaders.identifier" class="Dunglas\ApiBundle\Mapping\Loader\DoctrineIdentifierLoader" public="false">
-            <argument type="service" id="api.mapping.attribute_metadata_factory" />
+        <service id="api.doctrine.orm.metadata.property.factory.item" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Metadata\Property\ItemMetadataFactory" decorates="api.metadata.property.factory.item" public="false">
             <argument type="service" id="doctrine" />
+            <argument type="service" id="api.doctrine.orm.metadata.property.factory.item.inner" />
         </service>
 
         <!-- Event listener -->
 
-        <service id="api.doctrine.listener.view.manager" class="Dunglas\ApiBundle\Doctrine\EventListener\ManagerViewListener">
+        <service id="api.doctrine.listener.view.manager" class="Dunglas\ApiBundle\Bridge\Doctrine\EventListener\ManagerViewListener">
             <argument type="service" id="doctrine" />
 
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="10" />
@@ -54,24 +58,36 @@
 
         <!-- Doctrine Query extensions -->
 
-        <service id="api.doctrine.orm.query_extension.eager_loading" class="Dunglas\ApiBundle\Doctrine\Orm\Extension\EagerLoadingExtension">
+        <service id="api.doctrine.orm.query_extension.eager_loading" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\EagerLoadingExtension" public="false">
             <tag name="api.doctrine.orm.query_extension.item" />
             <tag name="api.doctrine.orm.query_extension.collection" />
         </service>
 
-        <service id="api.doctrine.orm.query_extension.filter" class="Dunglas\ApiBundle\Doctrine\Orm\Extension\FilterExtension">
+        <service id="api.doctrine.orm.query_extension.filter" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\FilterExtension" public="false">
+            <argument type="service" id="api.metadata.resource.factory.item" />
+            <argument type="service" id="api.filters" />
+
             <tag name="api.doctrine.orm.query_extension.collection" />
         </service>
 
-        <service id="api.doctrine.orm.query_extension.pagination" class="Dunglas\ApiBundle\Doctrine\Orm\Extension\PaginationExtension">
+        <service id="api.doctrine.orm.query_extension.pagination" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\PaginationExtension" public="false">
             <argument type="service" id="doctrine" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="api.metadata.resource.factory.item" />
+            <argument>%api.collection.pagination.enabled%</argument>
+            <argument>%api.collection.pagination.client_enabled%</argument>
+            <argument>%api.collection.pagination.client_items_per_page%</argument>
+            <argument>%api.collection.pagination.items_per_page%</argument>
+            <argument>%api.collection.pagination.page_parameter_name%%</argument>
+            <argument>%api.collection.pagination.enabled_parameter_name%</argument>
+            <argument>%api.collection.pagination.items_per_page_parameter_name%</argument>
 
             <tag name="api.doctrine.orm.query_extension.collection" />
         </service>
 
-        <service id="api.doctrine.orm.query_extension.order" class="Dunglas\ApiBundle\Doctrine\Orm\Extension\OrderExtension">
-            <argument>%api.collection.order%</argument>
+        <service id="api.doctrine.orm.query_extension.order" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension\OrderExtension" public="false">
+            <argument>%api.collection.order%%</argument>
+
             <tag name="api.doctrine.orm.query_extension.collection" />
         </service>
     </services>

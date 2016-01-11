@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Dunglas\ApiBundle\Bridge\Symfony\HttpKernel;
+namespace Dunglas\ApiBundle\Bridge\Symfony\Validator\EventListener;
 
-use Dunglas\ApiBundle\Exception\ValidationException;
+use Dunglas\ApiBundle\Bridge\Symfony\Validator\Exception\ValidationException;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
@@ -22,22 +22,22 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class ValidationViewListener
+final class ViewListener
 {
-    /**
-     * @var ValidatorInterface
-     */
-    private $validator;
-
     /**
      * @var ItemMetadataFactoryInterface
      */
     private $itemMetadataFactory;
 
-    public function __construct(ValidatorInterface $validator, ItemMetadataFactoryInterface $itemMetadataFactory)
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    public function __construct(ItemMetadataFactoryInterface $itemMetadataFactory, ValidatorInterface $validator)
     {
-        $this->validator = $validator;
         $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->validator = $validator;
     }
 
     /**
@@ -45,7 +45,7 @@ final class ValidationViewListener
      *
      * @param GetResponseForControllerResultEvent $event
      *
-     * @return mixed
+     * @return void
      *
      * @throws ValidationException
      */
@@ -57,7 +57,11 @@ final class ValidationViewListener
         $itemOperationName = $request->attributes->get('_item_operation_name');
         $collectionOperationName = $request->attributes->get('_collection_operation_name');
 
-        if (!$resourceClass || (!$itemOperationName && !$collectionOperationName) || !in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT])) {
+        $method = $request->getMethod();
+        if (
+            !$resourceClass || (!$itemOperationName && !$collectionOperationName) ||
+            (Request::METHOD_POST !== $method && Request::METHOD_PUT !== $method && Request::METHOD_PATCH !== $method)
+        ) {
             return;
         }
 
@@ -73,7 +77,7 @@ final class ValidationViewListener
 
         if (!$validationGroups) {
             // Fallback to the resource
-            $validationGroups = isset($itemMetadata->getAttributes()['validation_groups']) ? $itemMetadata->getAttributes()['validation_groups'] : null;
+            $validationGroups = $itemMetadata->getAttributes()['validation_groups'] ?? null;
         }
 
         if (is_callable($validationGroups)) {

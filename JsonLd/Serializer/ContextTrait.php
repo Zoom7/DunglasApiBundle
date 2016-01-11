@@ -11,6 +11,10 @@
 
 namespace Dunglas\ApiBundle\JsonLd\Serializer;
 
+use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
+use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
+use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
+
 /**
  * Serializer context creation and manipulation.
  *
@@ -19,32 +23,36 @@ namespace Dunglas\ApiBundle\JsonLd\Serializer;
 trait ContextTrait
 {
     /**
-     * Creates normalization context.
+     * Import the context defined in metadata and set some default values.
      *
      * @param string $resourceClass
+     * @param ItemMetadata $itemMetadata
      * @param array  $context
      *
      * @return array
      */
-    private function createContext(string $resourceClass, array $context) : array
+    private function createContext(string $resourceClass, ItemMetadata $itemMetadata, array $context, bool $normalization) : array
     {
         if (isset($context['jsonld_has_context'])) {
             return $context;
         }
 
+        $key = $normalization ? 'normalization_context' : 'denormalization_context';
+        $context += $this->getContextValue($itemMetadata, $context, $key, []);
+
+        if (!isset($context['resource_class'])) {
+            $context['resource_class'] = $resourceClass;
+        }
+
         return $context + [
-            'resource_class' => $resourceClass,
             'jsonld_has_context' => true,
             // Don't use hydra:Collection in sub levels
             'jsonld_sub_level' => true,
-            'jsonld_normalization_groups' => $resource->getNormalizationGroups(),
-            'jsonld_denormalization_groups' => $resource->getDenormalizationGroups(),
-            'jsonld_validation_groups' => $resource->getValidationGroups(),
         ];
     }
 
     /**
-     * Creates relation context.
+     * Updates the resource class and remove the object_to_populate key.
      *
      * @param string $resourceClass
      * @param array  $context
@@ -57,5 +65,62 @@ trait ContextTrait
         unset($context['object_to_populate']);
 
         return $context;
+    }
+
+    /**
+     * Gets a context value.
+     *
+     * @param ResourceItemMetadata $resourceItemMetadata
+     * @param array $context
+     * @param string $key
+     * @param mixed $defaultValue
+     *
+     * @return mixed
+     */
+    private function getContextValue(ItemMetadata $resourceItemMetadata, array $context, string $key, $defaultValue = null)
+    {
+        if (isset($context[$key])) {
+            return $context[$key];
+        }
+
+        if (isset($context['collection_operation_name'])) {
+            return $resourceItemMetadata->getCollectionOperationAttribute($context['collection_operation_name'], $key, $defaultValue, true);
+        }
+
+        if (isset($context['item_operation_name'])) {
+            return $resourceItemMetadata->getCollectionOperationAttribute($context['item_operation_name'], $key, $defaultValue, true);
+        }
+
+        return $resourceItemMetadata->getAttribute($key, $defaultValue);
+    }
+
+    /**
+     * Gets the resource class to use depending of the current data and context.
+     *
+     * @param ResourceClassResolverInterface $resourceClassResolver
+     * @param mixed $data
+     * @param array $context
+     *
+     * @return string
+     */
+    private function getResourceClass(ResourceClassResolverInterface $resourceClassResolver, $data, array $context) : string
+    {
+        return $resourceClassResolver->getResourceClass($data, $context['resource_class'] ?? null, true);
+    }
+
+    private function addJsonLdContext(ContextBuilderInterface $contextBuilder, string $resourceClass, array $context, array $data = []) : array
+    {
+        if (isset($context['jsonld_has_context'])) {
+            return $data;
+        }
+        if (isset($context['jsonld_embed_context'])) {
+            $data['@context'] = $contextBuilder->getResourceContext($resourceClass);
+
+            return $data;
+        }
+
+        $data['@context'] = $contextBuilder->getResourceContextUri($resourceClass);
+
+        return $data;
     }
 }

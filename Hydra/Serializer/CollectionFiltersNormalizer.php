@@ -11,9 +11,12 @@
 
 namespace Dunglas\ApiBundle\Hydra\Serializer;
 
+use Dunglas\ApiBundle\Api\FilterCollection;
 use Dunglas\ApiBundle\Api\FilterInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Api\ResourceResolver;
+use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
+use Dunglas\ApiBundle\Exception\RuntimeException;
+use Dunglas\ApiBundle\JsonLd\Serializer\ContextTrait;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -23,26 +26,36 @@ use Symfony\Component\Serializer\SerializerInterface;
  *
  * @author Samuel ROZE <samuel.roze@gmail.com>
  */
-class CollectionFiltersNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
+final class CollectionFiltersNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
 {
+    use ContextTrait;
+
     /**
-     * @var CollectionNormalizer
+     * @var NormalizerInterface
      */
     private $collectionNormalizer;
 
     /**
-     * @var ResourceResolver
+     * @var ItemMetadataFactoryInterface
      */
-    private $resourceResolver;
+    private $itemMetadataFactory;
 
     /**
-     * @param NormalizerInterface $collectionNormalizer
-     * @param ResourceResolver    $resourceResolver
+     * @var ResourceClassResolverInterface
      */
-    public function __construct(NormalizerInterface $collectionNormalizer, ResourceResolver $resourceResolver)
+    private $resourceClassResolver;
+
+    /**
+     * @var FilterCollection
+     */
+    private $filters;
+
+    public function __construct(NormalizerInterface $collectionNormalizer, ItemMetadataFactoryInterface $itemMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, FilterCollection $filters)
     {
         $this->collectionNormalizer = $collectionNormalizer;
-        $this->resourceResolver = $resourceResolver;
+        $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->resourceClassResolver = $resourceClassResolver;
+        $this->filters = $filters;
     }
 
     /**
@@ -51,16 +64,39 @@ class CollectionFiltersNormalizer extends SerializerAwareNormalizer implements N
     public function normalize($object, $format = null, array $context = [])
     {
         $data = $this->collectionNormalizer->normalize($object, $format, $context);
-        $resource = $this->resourceResolver->guessResource($object, $context);
+        if (isset($context['jsonld_sub_level'])) {
+            return $data;
+        }
 
-        if (!isset($context['jsonld_sub_level'])) {
-            $filters = $resource->getFilters();
-            if (!empty($filters)) {
-                $requestParts = parse_url($context['request_uri']);
-                if (is_array($requestParts)) {
-                    $data['hydra:search'] = $this->getSearch($resource, $requestParts, $filters);
-                }
+        $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+
+        $operationName = $context['collection_operation_name'] ?? null;
+
+        if ($operationName) {
+            $resourceFilters = $itemMetadata->getCollectionOperationAttribute($operationName, 'filters', [], true);
+        } else {
+            $resourceFilters = $itemMetadata->getAttribute('filters', []);
+        }
+
+        if ([] === $resourceFilters) {
+            return $data;
+        }
+
+        $requestParts = parse_url($context['request_uri']);
+        if (!is_array($requestParts)) {
+            return $data;
+        }
+
+        $currentFilters = [];
+        foreach ($this->filters as $filerName => $filter) {
+            if (isset($resourceFilters[$filerName])) {
+                $currentFilters[] = $filter;
             }
+        }
+
+        if ([] !== $currentFilters) {
+            $data['hydra:search'] = $this->getSearch($resourceClass, $requestParts, $currentFilters);
         }
 
         return $data;
@@ -69,18 +105,18 @@ class CollectionFiltersNormalizer extends SerializerAwareNormalizer implements N
     /**
      * Returns the content of the Hydra search property.
      *
-     * @param ResourceInterface $resource
+     * @param string            $resourceClass
      * @param array             $parts
      * @param FilterInterface[] $filters
      *
      * @return array
      */
-    private function getSearch(ResourceInterface $resource, array $parts, array $filters)
+    private function getSearch(string $resourceClass, array $parts, array $filters) : array
     {
         $variables = [];
         $mapping = [];
         foreach ($filters as $filter) {
-            foreach ($filter->getDescription($resource) as $variable => $data) {
+            foreach ($filter->getDescription($resourceClass) as $variable => $data) {
                 $variables[] = $variable;
                 $mapping[] = [
                     '@type' => 'IriTemplateMapping',
