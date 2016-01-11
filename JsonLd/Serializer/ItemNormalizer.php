@@ -80,15 +80,16 @@ final class ItemNormalizer extends AbstractNormalizer
      */
     private $propertyAccessor;
 
-    public function __construct(ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory, IriConverterInterface $iriConverter, ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceClassResolver, PropertyAccessorInterface $propertyAccessor = null, NameConverterInterface $nameConverter = null) {
+    public function __construct(ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory, IriConverterInterface $iriConverter, ResourceClassResolverInterface $resourceClassResolver, ContextBuilderInterface $contextBuilder, PropertyAccessorInterface $propertyAccessor = null, NameConverterInterface $nameConverter = null)
+    {
         parent::__construct(null, $nameConverter);
 
         $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
         $this->propertyCollectionMetadataFactory = $propertyCollectionMetadataFactory;
         $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
         $this->iriConverter = $iriConverter;
-        $this->contextBuilder = $contextBuilder;
         $this->resourceClassResolver = $resourceClassResolver;
+        $this->contextBuilder = $contextBuilder;
         $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
 
         $this->setCircularReferenceHandler(function ($object) {

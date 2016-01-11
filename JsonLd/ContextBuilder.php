@@ -26,11 +26,6 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 final class ContextBuilder implements ContextBuilderInterface
 {
     /**
-     * @var UrlGeneratorInterface
-     */
-    private $urlGenerator;
-
-    /**
      * @var ResourceCollectionMetadataFactoryInterface
      */
     private $resourceCollectionMetadataFactory;
@@ -51,17 +46,22 @@ final class ContextBuilder implements ContextBuilderInterface
     private $propertyItemMetadataFactory;
 
     /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+
+    /**
      * @var NameConverterInterface
      */
     private $nameConverter;
 
-    public function __construct(UrlGeneratorInterface $urlGenerator, ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory, NameConverterInterface $nameConverter = null)
+    public function __construct(ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyCollectionMetadataFactoryInterface $propertyCollectionMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory, UrlGeneratorInterface $urlGenerator, NameConverterInterface $nameConverter = null)
     {
-        $this->urlGenerator = $urlGenerator;
         $this->resourceCollectionMetadataFactory = $resourceCollectionMetadataFactory;
         $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
         $this->propertyCollectionMetadataFactory = $propertyCollectionMetadataFactory;
         $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
+        $this->urlGenerator = $urlGenerator;
         $this->nameConverter = $nameConverter;
 
     }

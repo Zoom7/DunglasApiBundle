@@ -25,16 +25,6 @@ use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 final class EntrypointBuilder implements EntrypointBuilderInterface
 {
     /**
-     * @var IriConverterInterface
-     */
-    private $iriConverter;
-
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private $urlGenerator;
-
-    /**
      * @var CollectionMetadataFactoryInterface
      */
     private $collectionMetadataFactory;
@@ -44,11 +34,22 @@ final class EntrypointBuilder implements EntrypointBuilderInterface
      */
     private $itemMetadataFactory;
 
-    public function __construct(IriConverterInterface $iriConverter, UrlGeneratorInterface $urlGenerator, CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory) {
-        $this->iriConverter = $iriConverter;
-        $this->urlGenerator = $urlGenerator;
+    /**
+     * @var IriConverterInterface
+     */
+    private $iriConverter;
+
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+
+    public function __construct(CollectionMetadataFactoryInterface $collectionMetadataFactory, ItemMetadataFactoryInterface $itemMetadataFactory, IriConverterInterface $iriConverter, UrlGeneratorInterface $urlGenerator)
+    {
         $this->collectionMetadataFactory = $collectionMetadataFactory;
         $this->itemMetadataFactory = $itemMetadataFactory;
+        $this->iriConverter = $iriConverter;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**
