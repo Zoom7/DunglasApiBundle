@@ -61,7 +61,7 @@ final class CollectionMetadataAnnotationFactory implements CollectionMetadataFac
 
         try {
             $reflectionClass = new \ReflectionClass($resourceClass);
-        } catch(\ReflectionException $reflectionException) {
+        } catch (\ReflectionException $reflectionException) {
             if (isset($collectionMetadata)) {
                 return $collectionMetadata;
             }

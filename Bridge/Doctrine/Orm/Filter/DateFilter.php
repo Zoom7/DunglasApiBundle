@@ -33,7 +33,7 @@ class DateFilter extends AbstractFilter
     /**
      * @var array
      */
-    CONST DOCTRINE_DATE_TYPES = [
+    const DOCTRINE_DATE_TYPES = [
         'date' => true,
         'datetime' => true,
         'datetimetz' => true,

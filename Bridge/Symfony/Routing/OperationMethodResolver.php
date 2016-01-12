@@ -78,13 +78,12 @@ class OperationMethodResolver implements OperationMethodResolverInterface
             $routeName = $itemMetadata->getItemOperationAttribute($operationName, 'route_name');
         }
 
-
         if (null === $routeName) {
             throw new RuntimeException('Either a "route_name" or a "method" operation attribute must exist.');
         }
 
-        /**
-         * @var Route $route
+        /*
+         * @var Route
          */
         foreach ($this->router->getRouteCollection() as $name => $route) {
             if ($routeName === $name) {

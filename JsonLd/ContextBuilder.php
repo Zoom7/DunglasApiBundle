@@ -63,7 +63,6 @@ final class ContextBuilder implements ContextBuilderInterface
         $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
         $this->urlGenerator = $urlGenerator;
         $this->nameConverter = $nameConverter;
-
     }
 
     /**

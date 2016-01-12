@@ -128,6 +128,7 @@ final class ItemMetadata
     {
         $metadata = clone $this;
         $metadata->iri = $iri;
+
         return $metadata;
     }
 
@@ -181,8 +182,6 @@ final class ItemMetadata
         return $metadata;
     }
 
-
-
     /**
      * Gets a collection operation attribute, optionally fallback to a resource attribute.
      *
@@ -210,7 +209,7 @@ final class ItemMetadata
      */
     public function getItemOperationAttribute(string $operationName, string $key, $defaultValue = null, bool $resourceFallback = false)
     {
-        return $this->getOperationAttribute($this->itemOperations, $operationName , $key, $defaultValue, $resourceFallback);
+        return $this->getOperationAttribute($this->itemOperations, $operationName, $key, $defaultValue, $resourceFallback);
     }
 
     /**

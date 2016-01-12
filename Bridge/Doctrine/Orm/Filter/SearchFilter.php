@@ -14,7 +14,6 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 use Dunglas\ApiBundle\Api\IriConverterInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
 use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryNameGenerator;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -67,7 +66,6 @@ class SearchFilter extends AbstractFilter
      * @var PropertyAccessorInterface
      */
     private $propertyAccessor;
-
 
     /**
      * @param ManagerRegistry           $managerRegistry

@@ -12,7 +12,6 @@
 namespace Dunglas\ApiBundle\Action;
 
 use Dunglas\ApiBundle\Exception\RuntimeException;
-use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 

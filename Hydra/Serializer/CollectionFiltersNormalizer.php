@@ -14,7 +14,6 @@ namespace Dunglas\ApiBundle\Hydra\Serializer;
 use Dunglas\ApiBundle\Api\FilterCollection;
 use Dunglas\ApiBundle\Api\FilterInterface;
 use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
-use Dunglas\ApiBundle\Exception\RuntimeException;
 use Dunglas\ApiBundle\JsonLd\Serializer\ContextTrait;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;

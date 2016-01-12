@@ -13,7 +13,6 @@ namespace Dunglas\ApiBundle\Action;
 
 use Dunglas\ApiBundle\Exception\RuntimeException;
 use Dunglas\ApiBundle\Api\DataProviderInterface;
-use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -60,6 +59,7 @@ final class PutItemAction
         $data = $this->getItem($this->dataProvider, $resourceClass, $id, $operationName);
 
         $context = ['object_to_populate' => $data, 'resource_class' => $resourceClass, 'item_operation_name' => $operationName];
+
         return $this->serializer->deserialize($request->getContent(), $resourceClass, $format, $context);
     }
 }

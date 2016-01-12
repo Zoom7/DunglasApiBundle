@@ -101,7 +101,7 @@ final class IriConverter implements IriConverterInterface
             }
         }
 
-        return $this->router->generate($routeName, ['id' => join('-', $identifierValues)], $referenceType);
+        return $this->router->generate($routeName, ['id' => implode('-', $identifierValues)], $referenceType);
     }
 
     /**

@@ -84,7 +84,7 @@ final class DataProvider implements DataProviderInterface
     {
         if ($this->decorated) {
             try {
-                 return $this->decorated->getItem($resourceClass, $id, $operationName, $fetchData);
+                return $this->decorated->getItem($resourceClass, $id, $operationName, $fetchData);
             } catch (ResourceClassNotSupportedException $resourceClassNotSupportedException) {
                 // Ignore it
             }
@@ -126,7 +126,7 @@ final class DataProvider implements DataProviderInterface
             $placeholder = 'id_'.$propertyName;
 
             $queryBuilder
-                ->where($queryBuilder->expr()->eq('o.' . $propertyName, ':'.$placeholder))
+                ->where($queryBuilder->expr()->eq('o.'.$propertyName, ':'.$placeholder))
                 ->setParameter($placeholder, $value)
             ;
         }
@@ -173,7 +173,7 @@ final class DataProvider implements DataProviderInterface
     }
 
     /**
-     * Is this class supported
+     * Is this class supported.
      */
     private function supports(string $resourceClass) : bool
     {

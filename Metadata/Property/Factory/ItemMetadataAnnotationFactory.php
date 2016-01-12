@@ -94,8 +94,8 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
      * Returns the metadata from the decorated factory if available or throws an exception.
      *
      * @param ItemMetadata|null $parentMetadata
-     * @param string $resourceClass
-     * @param string $property
+     * @param string            $resourceClass
+     * @param string            $property
      *
      * @return ItemMetadata
      *

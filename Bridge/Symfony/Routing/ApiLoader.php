@@ -142,7 +142,7 @@ final class ApiLoader extends Loader
             [],
             '',
             [],
-            [ $operation['method'] ]
+            [$operation['method']]
         );
 
         $routeCollection->add($routeName, $route);

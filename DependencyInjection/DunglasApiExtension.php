@@ -35,11 +35,11 @@ final class DunglasApiExtension extends Extension implements PrependExtensionInt
         }
 
         if (!isset($frameworkConfiguration['serializer']) || !isset($frameworkConfiguration['serializer']['enabled'])) {
-            $container->prependExtensionConfig('framework', [ 'serializer' => [ 'enabled' => true ] ]);
+            $container->prependExtensionConfig('framework', ['serializer' => ['enabled' => true]]);
         }
 
         if (!isset($frameworkConfiguration['property_info']) || !isset($frameworkConfiguration['property_info']['enabled'])) {
-            $container->prependExtensionConfig('framework', [ 'property_info' => [ 'enabled' => true ] ]);
+            $container->prependExtensionConfig('framework', ['property_info' => ['enabled' => true]]);
         }
     }
 

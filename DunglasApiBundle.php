@@ -11,10 +11,8 @@
 
 namespace Dunglas\ApiBundle;
 
-use Dunglas\ApiBundle\DependencyInjection\Compiler\DataProviderPass;
 use Dunglas\ApiBundle\DependencyInjection\Compiler\DoctrineQueryExtensionPass;
 use Dunglas\ApiBundle\DependencyInjection\Compiler\FilterPass;
-use Dunglas\ApiBundle\DependencyInjection\Compiler\MappingLoaderPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

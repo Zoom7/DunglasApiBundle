@@ -34,7 +34,6 @@ final class CollectionMetadataFactory implements CollectionMetadataFactoryInterf
      */
     private $decorated;
 
-
     public function __construct(Cache $cache, CollectionMetadataFactoryInterface $decorated)
     {
         $this->cache = $cache;

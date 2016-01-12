@@ -32,7 +32,7 @@ class Reflection
      */
     public function getProperty($methodName)
     {
-        $pattern = join('|', array_merge(self::ACCESSOR_PREFIXES, self::MUTATOR_PREFIXES));
+        $pattern = implode('|', array_merge(self::ACCESSOR_PREFIXES, self::MUTATOR_PREFIXES));
 
         if (preg_match('/^('.$pattern.')(.+)$/i', $methodName, $matches)) {
             return $matches[2];

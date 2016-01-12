@@ -45,8 +45,6 @@ final class ViewListener
      *
      * @param GetResponseForControllerResultEvent $event
      *
-     * @return void
-     *
      * @throws ValidationException
      */
     public function onKernelView(GetResponseForControllerResultEvent $event)
@@ -81,7 +79,7 @@ final class ViewListener
         }
 
         if (is_callable($validationGroups)) {
-            $validationGroups = call_user_func_array($validationGroups, [ $data ]);
+            $validationGroups = call_user_func_array($validationGroups, [$data]);
         }
 
         $violations = $this->validator->validate($data, null, $validationGroups);

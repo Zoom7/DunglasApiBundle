@@ -244,8 +244,8 @@ final class ItemNormalizer extends AbstractNormalizer
                 continue;
             }
 
-            /**
-             * @var $type Type
+            /*
+             * @var Type
              */
             $type = $allowedAttributes[$attributeName]->getType();
             if ($type && $attributeValue) {
@@ -303,9 +303,9 @@ final class ItemNormalizer extends AbstractNormalizer
      * Normalizes a relation as an URI if is a Link or as a JSON-LD object.
      *
      * @param PropertyItemMetadata $propertyItemMetadata
-     * @param mixed                      $relatedObject
-     * @param string                     $resourceClass
-     * @param array                      $context
+     * @param mixed                $relatedObject
+     * @param string               $resourceClass
+     * @param array                $context
      *
      * @return string|array
      */
@@ -321,12 +321,12 @@ final class ItemNormalizer extends AbstractNormalizer
     /**
      * Denormalizes a relation.
      *
-     * @param string $resourceClass
+     * @param string               $resourceClass
      * @param string               $attributeName
      * @param PropertyItemMetadata $propertyItemMetadata
-     * @param string                     $class
-     * @param mixed                      $value
-     * @param array                      $context
+     * @param string               $class
+     * @param mixed                $value
+     * @param array                $context
      *
      * @return object|null
      *

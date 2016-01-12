@@ -51,7 +51,7 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
             }
         }
 
-        if (null === $itemMetadata->getDescription())  {
+        if (null === $itemMetadata->getDescription()) {
             $itemMetadata = $itemMetadata->withDescription($this->propertyInfo->getShortDescription($resourceClass, $name, $options));
         }
 

@@ -25,9 +25,9 @@ trait ContextTrait
     /**
      * Import the context defined in metadata and set some default values.
      *
-     * @param string $resourceClass
+     * @param string       $resourceClass
      * @param ItemMetadata $itemMetadata
-     * @param array  $context
+     * @param array        $context
      *
      * @return array
      */
@@ -71,9 +71,9 @@ trait ContextTrait
      * Gets a context value.
      *
      * @param ResourceItemMetadata $resourceItemMetadata
-     * @param array $context
-     * @param string $key
-     * @param mixed $defaultValue
+     * @param array                $context
+     * @param string               $key
+     * @param mixed                $defaultValue
      *
      * @return mixed
      */
@@ -98,8 +98,8 @@ trait ContextTrait
      * Gets the resource class to use depending of the current data and context.
      *
      * @param ResourceClassResolverInterface $resourceClassResolver
-     * @param mixed $data
-     * @param array $context
+     * @param mixed                          $data
+     * @param array                          $context
      *
      * @return string
      */

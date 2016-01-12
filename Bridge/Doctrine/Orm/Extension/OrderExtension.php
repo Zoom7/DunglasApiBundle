@@ -41,7 +41,7 @@ class OrderExtension implements QueryCollectionExtensionInterface
 
         if (null !== $this->order) {
             foreach ($identifiers as $identifier) {
-                $queryBuilder->addOrderBy('o.' . $identifier, $this->order);
+                $queryBuilder->addOrderBy('o.'.$identifier, $this->order);
             }
         }
     }
