@@ -54,7 +54,7 @@ final class ItemMetadata
         $this->description = $description;
         $this->iri = $iri;
         $this->itemOperations = $itemOperations;
-        $this->collectionOperations;
+        $this->collectionOperations = $collectionOperations;
         $this->attributes = $attributes;
     }
 

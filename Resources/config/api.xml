@@ -26,7 +26,6 @@
             <argument type="service" id="kernel" />
             <argument type="service" id="api.metadata.resource.factory.collection" />
             <argument type="service" id="api.metadata.resource.factory.item" />
-            <argument type="service" id="api.metadata.property.factory.item" />
 
             <tag name="routing.loader" />
         </service>

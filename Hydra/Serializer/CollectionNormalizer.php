@@ -82,7 +82,7 @@ final class CollectionNormalizer extends SerializerAwareNormalizer implements No
         }
 
         $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
-        $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
+        $resourceItemMetadata = $this->itemMetadataFactory->create($resourceClass);
         $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
         $data = $this->addJsonLdContext($this->contextBuilder, $resourceClass, $context);
 

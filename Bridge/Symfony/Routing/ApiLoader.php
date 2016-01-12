@@ -48,17 +48,11 @@ final class ApiLoader extends Loader
      */
     private $resourceItemMetadataFactory;
 
-    /**
-     * @var PropertyItemMetadataFactoryInterface
-     */
-    private $propertyItemMetadataFactory;
-
-    public function __construct(KernelInterface $kernel, ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory, PropertyItemMetadataFactoryInterface $propertyItemMetadataFactory)
+    public function __construct(KernelInterface $kernel, ResourceCollectionMetadataFactoryInterface $resourceCollectionMetadataFactory, ResourceItemMetadataFactoryInterface $resourceItemMetadataFactory)
     {
         $this->fileLoader = new XmlFileLoader(new FileLocator($kernel->locateResource('@DunglasApiBundle/Resources/config/routing')));
         $this->resourceCollectionMetadataFactory = $resourceCollectionMetadataFactory;
         $this->resourceItemMetadataFactory = $resourceItemMetadataFactory;
-        $this->propertyItemMetadataFactory = $propertyItemMetadataFactory;
     }
 
     /**
