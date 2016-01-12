@@ -5,7 +5,7 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="api.data_provider" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\DataProvider" lazy="true" />
+        <service id="api.data_provider" class="Dunglas\ApiBundle\Bridge\Doctrine\Orm\DataProvider" />
 
         <service id="api.doctrine.metadata_factory" class="Doctrine\Common\Persistence\Mapping\ClassMetadataFactory" public="false">
             <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />

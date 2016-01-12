@@ -112,11 +112,7 @@ final class DunglasApiExtension extends Extension implements PrependExtensionInt
             }
         }
 
-        $definition = $container->register('api.mapping.resource.loader.collection.annotation', 'Dunglas\ApiBundle\Mapping\Resource\Loader\Annotation\CollectionLoader');
-        $definition->setPublic(false);
-        $definition->addArgument(new Reference('annotation_reader'));
-        $definition->addArgument($paths);
-        $definition->addTag('api.mapping.resource.loader', ['priority' => -100]);
+        $container->getDefinition('api.metadata.resource.factory.collection.annotation')->addArgument($paths);
     }
 
     /**

@@ -11,6 +11,7 @@
 
 namespace Dunglas\ApiBundle\Tests\Behat\TestBundle\EventListener;
 
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
@@ -30,9 +31,15 @@ class XmlResponderViewListener
      */
     private $serializer;
 
-    public function __construct(SerializerInterface $serializer)
+    /**
+     * @var ItemMetadataFactoryInterface
+     */
+    private $itemMetadataFactory;
+
+    public function __construct(SerializerInterface $serializer, ItemMetadataFactoryInterface $itemMetadataFactory)
     {
         $this->serializer = $serializer;
+        $this->itemMetadataFactory = $itemMetadataFactory;
     }
 
     /**
@@ -71,9 +78,12 @@ class XmlResponderViewListener
                 break;
         }
 
-        $resourceType = $request->attributes->get('_resource_type');
+        $resourceClass = $request->attributes->get('_resource_class');
+        $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
+        $context = $itemMetadata->getAttribute('normalization_context', []);
+
         $response = new Response(
-            $this->serializer->serialize($controllerResult, self::FORMAT, $resourceType->getNormalizationContext()),
+            $this->serializer->serialize($controllerResult, self::FORMAT, $context),
             $status,
             ['Content-Type' => 'application/xml']
         );

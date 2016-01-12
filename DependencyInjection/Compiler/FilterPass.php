@@ -11,6 +11,7 @@
 
 namespace Dunglas\ApiBundle\DependencyInjection\Compiler;
 
+use Dunglas\ApiBundle\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -32,11 +33,11 @@ final class FilterPass implements CompilerPassInterface
         $filters = [];
         foreach ($container->findTaggedServiceIds('api.filter') as $serviceId => $tags) {
             foreach ($tags as $tag) {
-                if (!isset($tag['name'])) {
-                    throw new \RuntimeException('Filter tags must have a "name" property.');
+                if (!isset($tag['id'])) {
+                    throw new RuntimeException('Filter tags must have an "id" property.');
                 }
 
-                $filters[$tag['name']] = new Reference($serviceId);
+                $filters[$tag['id']] = new Reference($serviceId);
             }
         }
 

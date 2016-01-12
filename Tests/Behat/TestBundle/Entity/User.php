@@ -19,8 +19,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ORM\Entity
  * @Resource(attributes={
- *     "normalization-context" = {"user", "user-read"},
- *     "denormalization-context" = {"user", "user-write"}
+ *     "normalization-context"={"user", "user-read"},
+ *     "denormalization-context"={"user", "user-write"}
  * })
  *
  * @author Théo FIDRY <theo.fidry@gmail.com>

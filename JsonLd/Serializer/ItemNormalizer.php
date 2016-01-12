@@ -381,6 +381,7 @@ final class ItemNormalizer extends AbstractNormalizer
      * @see https://github.com/symfony/symfony/blob/master/src/Symfony/Component/PropertyInfo/Extractor/SerializerExtractor.php
      *
      * @param array $context
+     * @param bool  $normalization
      *
      * @return array
      */

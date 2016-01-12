@@ -22,7 +22,7 @@ namespace Dunglas\ApiBundle\Annotation;
 final class Resource
 {
     /**
-     * @var string|null
+     * @var string
      */
     public $shortName;
 
@@ -32,22 +32,22 @@ final class Resource
     public $description;
 
     /**
-     * @var string|null
+     * @var string
      */
     public $iri;
 
     /**
-     * @var array|null
+     * @var array
      */
     public $itemOperations;
 
     /**
-     * @var array|null
+     * @var array
      */
     public $collectionOperations;
 
     /**
      * @var array
      */
-    public $attributes;
+    public $attributes = [];
 }

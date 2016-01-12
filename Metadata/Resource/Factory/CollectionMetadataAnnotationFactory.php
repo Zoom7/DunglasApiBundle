@@ -95,6 +95,6 @@ final class CollectionMetadataAnnotationFactory implements CollectionMetadataFac
             }
         }
 
-        return new Collection(array_keys($classes));
+        return new CollectionMetadata(array_keys($classes));
     }
 }

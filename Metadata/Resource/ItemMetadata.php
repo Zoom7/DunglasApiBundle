@@ -48,7 +48,7 @@ final class ItemMetadata
      */
     private $attributes;
 
-    public function __construct(string $shortName, string $description, string $iri, array $itemOperations = null, array $collectionOperations = null, array $attributes)
+    public function __construct(string $shortName = null, string $description = null, string $iri = null, array $itemOperations = null, array $collectionOperations = null, array $attributes)
     {
         $this->shortName = $shortName;
         $this->description = $description;
@@ -61,9 +61,9 @@ final class ItemMetadata
     /**
      * Gets the short name.
      *
-     * @return string
+     * @return string|null
      */
-    public function getShortName() : string
+    public function getShortName()
     {
         return $this->shortName;
     }

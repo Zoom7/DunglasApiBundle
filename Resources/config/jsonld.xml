@@ -5,7 +5,7 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="api.jsonld.entrypoint_builder" class="Dunglas\ApiBundle\JsonLd\EntrypointBuilder" public="false" lazy="true">
+        <service id="api.jsonld.entrypoint_builder" class="Dunglas\ApiBundle\JsonLd\EntrypointBuilder" public="false">
             <argument type="service" id="api.metadata.resource.factory.collection" />
             <argument type="service" id="api.metadata.resource.factory.item" />
             <argument type="service" id="api.iri_converter" />

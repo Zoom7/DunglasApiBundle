@@ -51,13 +51,13 @@
             <tag name="serializer.normalizer" priority="50" />
         </service>
 
-        <service id="api.hydra.normalizer.constraint_violation_list" class="Dunglas\ApiBundle\Bridge\Symfony\Validator\Hydra\Serializer\ConstraintViolationListNormalizer" public="false" lazy="true">
+        <service id="api.hydra.normalizer.constraint_violation_list" class="Dunglas\ApiBundle\Bridge\Symfony\Validator\Hydra\Serializer\ConstraintViolationListNormalizer" public="false">
             <argument type="service" id="router" />
 
             <tag name="serializer.normalizer" />
         </service>
 
-        <service id="api.hydra.normalizer.error" class="Dunglas\ApiBundle\Hydra\Serializer\ErrorNormalizer" public="false" lazy="true">
+        <service id="api.hydra.normalizer.error" class="Dunglas\ApiBundle\Hydra\Serializer\ErrorNormalizer" public="false">
             <argument type="service" id="api.router" />
             <argument>%kernel.debug%</argument>
 

@@ -16,7 +16,7 @@ use Dunglas\ApiBundle\JsonLd\ContextBuilderInterface;
 use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
 
 /**
- * Serializer context creation and manipulation.
+ * Creates and manipulates the Serializer context.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */

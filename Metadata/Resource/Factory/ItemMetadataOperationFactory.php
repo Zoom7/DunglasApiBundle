@@ -12,7 +12,6 @@
 namespace Dunglas\ApiBundle\Metadata\Resource\Factory;
 
 use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
-use Dunglas\ApiBundle\Metadata\Resource\Operation;
 
 /**
  * Creates or completes operations.
@@ -59,7 +58,7 @@ class ItemMetadataOperationFactory implements ItemMetadataFactoryInterface
     {
         $operations = [];
         foreach ($methods as $method) {
-            $operations[strtolower($method)] = new Operation(null, null, ['method' => $method]);
+            $operations[strtolower($method)] = ['method' => $method];
         }
 
         return $operations;

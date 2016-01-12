@@ -41,8 +41,6 @@ final class ItemMetadataShortNameFactory implements ItemMetadataFactoryInterface
             return $itemMetadata;
         }
 
-        $name = $itemMetadata->getName();
-
-        return $itemMetadata->withShortName(substr($name, strrpos($name, '\\') + 1));
+        return $itemMetadata->withShortName(substr($resourceClass, strrpos($resourceClass, '\\') + 1));
     }
 }

@@ -16,7 +16,6 @@ use Dunglas\ApiBundle\Exception\RuntimeException;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface as PropertyItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface as ResourceCollectionMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
-use Dunglas\ApiBundle\Metadata\Resource\Operation;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -102,30 +101,27 @@ final class ApiLoader extends Loader
      * @param RouteCollection $routeCollection
      * @param string          $resourceClass
      * @param string          $operationName
-     * @param Operation       $operation
+     * @param array           $operation
      * @param string          $normalizedShortName
      * @param bool            $collection
      *
      * @throws RuntimeException
      */
-    private function addRoute(RouteCollection $routeCollection, string $resourceClass, string $operationName, Operation $operation, string $normalizedShortName, bool $collection)
+    private function addRoute(RouteCollection $routeCollection, string $resourceClass, string $operationName, array $operation, string $normalizedShortName, bool $collection)
     {
-        $attributes = $operation->getAttributes();
-
-        if (isset($attributes['route_name'])) {
+        if (isset($operation['route_name'])) {
             return;
         }
 
-        if (!isset($attributes['method'])) {
+        if (!isset($operation['method'])) {
             throw new RuntimeException('Either a "route_name" or a "method" operation attribute must exist.');
         }
 
-        if (isset($attributes['controller'])) {
-            $actionName = sprintf('%s_%s', strtolower($attributes['method']), $collection ? 'collection' : 'item');
-
-            $controller = self::DEFAULT_ACTION_PATTERN.$actionName;
+        if (isset($operation['controller'])) {
+            $controller = $operation['controller'];
         } else {
-            $controller = $attributes['controller'];
+            $actionName = sprintf('%s_%s', strtolower($operation['method']), $collection ? 'collection' : 'item');
+            $controller = self::DEFAULT_ACTION_PATTERN.$actionName;
         }
 
         $path = '/'.$normalizedShortName;
@@ -146,7 +142,7 @@ final class ApiLoader extends Loader
             [],
             '',
             [],
-            [ $attributes['method'] ]
+            [ $operation['method'] ]
         );
 
         $routeCollection->add($routeName, $route);
