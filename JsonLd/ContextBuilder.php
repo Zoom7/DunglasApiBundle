@@ -15,7 +15,7 @@ use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterfa
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface as PropertyItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\CollectionMetadataFactoryInterface as ResourceCollectionMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface as ResourceItemMetadataFactoryInterface;
-use DunglasApiBundle\Api\UrlGeneratorInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 /**
@@ -68,7 +68,7 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
+    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
     {
         return [
             '@vocab' => $this->urlGenerator->generate('api_hydra_vocab', [], $referenceType).'#',

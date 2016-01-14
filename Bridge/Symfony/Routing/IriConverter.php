@@ -12,6 +12,7 @@
 namespace Dunglas\ApiBundle\Bridge\Symfony\Routing;
 
 use Dunglas\ApiBundle\Api\IriConverterInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
@@ -87,7 +88,7 @@ final class IriConverter implements IriConverterInterface
     /**
      * {@inheritdoc}
      */
-    public function getIriFromItem($item, bool $referenceType = RouterInterface::ABSOLUTE_PATH) : string
+    public function getIriFromItem($item, int $referenceType = UrlGeneratorInterface::ABS_PATH) : string
     {
         $resourceClass = get_class($item);
         $routeName = $this->getRouteName($resourceClass, false);
@@ -107,7 +108,7 @@ final class IriConverter implements IriConverterInterface
     /**
      * {@inheritdoc}
      */
-    public function getIriFromResourceClass(string $resourceClass, $referenceType = RouterInterface::ABSOLUTE_PATH)
+    public function getIriFromResourceClass(string $resourceClass, int $referenceType = UrlGeneratorInterface::ABS_PATH) : string
     {
         try {
             return $this->router->generate($this->getRouteName($resourceClass, true), [], $referenceType);

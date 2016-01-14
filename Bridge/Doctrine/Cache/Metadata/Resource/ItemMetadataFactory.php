@@ -12,7 +12,7 @@
 namespace Dunglas\ApiBundle\Bridge\Doctrine\Cache\Metadata\Resource;
 
 use Doctrine\Common\Cache\Cache;
-use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
+use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Resource\ItemMetadata;
 
 /**
@@ -43,7 +43,7 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, array $options) : ItemMetadata
+    public function create(string $resourceClass) : ItemMetadata
     {
         $key = sprintf(self::KEY_PATTERN, $resourceClass);
 
@@ -51,7 +51,7 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
             return $this->cache->fetch($key);
         }
 
-        $metadata = $this->decorated->create($resourceClass, $options);
+        $metadata = $this->decorated->create($resourceClass);
         $this->cache->save($key, $metadata);
 
         return $metadata;

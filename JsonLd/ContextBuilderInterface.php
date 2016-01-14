@@ -34,7 +34,7 @@ interface ContextBuilderInterface
      *
      * @return array
      */
-    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array;
+    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array;
 
     /**
      * Builds the JSON-LD context for the entrypoint.
@@ -43,7 +43,7 @@ interface ContextBuilderInterface
      *
      * @return array
      */
-    public function getEntrypointContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array;
+    public function getEntrypointContext(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array;
 
     /**
      * Builds the JSON-LD context for the given resource.
@@ -55,7 +55,7 @@ interface ContextBuilderInterface
      *
      * @throws ResourceClassNotFoundException
      */
-    public function getResourceContext(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array;
+    public function getResourceContext(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABS_PATH) : array;
 
     /**
      * Gets the URI of the given resource context.
@@ -65,5 +65,5 @@ interface ContextBuilderInterface
      *
      * @return string
      */
-    public function getResourceContextUri(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : string;
+    public function getResourceContextUri(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABS_PATH) : string;
 }

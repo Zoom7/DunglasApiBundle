@@ -52,7 +52,7 @@
         </service>
 
         <service id="api.hydra.normalizer.constraint_violation_list" class="Dunglas\ApiBundle\Bridge\Symfony\Validator\Hydra\Serializer\ConstraintViolationListNormalizer" public="false">
-            <argument type="service" id="router" />
+            <argument type="service" id="api.router" />
 
             <tag name="serializer.normalizer" />
         </service>
@@ -84,9 +84,9 @@
             <argument type="service" id="api.hydra.documentation_builder" />
         </service>
 
-        <service id="api.hydra.action.exception" class="Dunglas\ApiBundle\Hydra\Action\ExceptionAction">
+        <!--<service id="api.hydra.action.exception" class="Dunglas\ApiBundle\Hydra\Action\ExceptionAction">
             <argument type="service" id="api.hydra.normalizer.error" />
-       </service>
+       </service>-->
 
     </services>
 

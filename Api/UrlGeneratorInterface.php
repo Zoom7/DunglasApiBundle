@@ -32,25 +32,25 @@ interface UrlGeneratorInterface
     /**
      * Generates an absolute URL, e.g. "http://example.com/dir/file".
      */
-    const ABSOLUTE_URL = 0;
+    const ABS_URL = 0;
 
     /**
      * Generates an absolute path, e.g. "/dir/file".
      */
-    const ABSOLUTE_PATH = 1;
+    const ABS_PATH = 1;
 
     /**
      * Generates a relative path based on the current request path, e.g. "../parent-file".
      *
      * @see UrlGenerator::getRelativePath()
      */
-    const RELATIVE_PATH = 2;
+    const REL_PATH = 2;
 
     /**
      * Generates a network path, e.g. "//example.com/dir/file".
      * Such reference reuses the current scheme but specifies the host.
      */
-    const NETWORK_PATH = 3;
+    const NET_PATH = 3;
 
     /**
      * Generates a URL or path for a specific route based on the given parameters.
@@ -73,5 +73,5 @@ interface UrlGeneratorInterface
      *
      * @return string The generated URL
      */
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH);
+    public function generate($name, $parameters = [], $referenceType = self::ABS_PATH);
 }

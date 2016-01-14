@@ -208,7 +208,7 @@ final class ItemNormalizer extends AbstractNormalizer
 
         $allowedAttributes = [];
         foreach ($propertyNames as $propertyName) {
-            $propertyItemMetadata = $this->propertyItemMetadataFactory->create($propertyName);
+            $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
 
             if ($propertyItemMetadata->isWritable()) {
                 $allowedAttributes[$propertyName] = $propertyItemMetadata;
@@ -387,7 +387,7 @@ final class ItemNormalizer extends AbstractNormalizer
      */
     private function getPropertyCollectionFactoryContext(array $context) : array
     {
-        if ($context['groups']) {
+        if (isset($context['groups'])) {
             return ['serializer_groups' => $context['groups']];
         }
 

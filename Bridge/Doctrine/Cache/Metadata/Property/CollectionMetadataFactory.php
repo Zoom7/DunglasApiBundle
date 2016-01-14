@@ -42,7 +42,7 @@ final class CollectionMetadataFactory implements CollectionMetadataFactoryInterf
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, array $options) : CollectionMetadata
+    public function create(string $resourceClass, array $options = []) : CollectionMetadata
     {
         $key = sprintf(self::KEY_PATTERN, $resourceClass, serialize($options));
 

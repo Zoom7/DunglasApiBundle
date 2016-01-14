@@ -58,7 +58,7 @@ class SearchFilter extends AbstractFilter
     private $requestStack;
 
     /**
-     * @var IriConverterInterface
+     * @var IriConverterInterface|null
      */
     private $iriConverter;
 
@@ -70,17 +70,28 @@ class SearchFilter extends AbstractFilter
     /**
      * @param ManagerRegistry           $managerRegistry
      * @param RequestStack              $requestStack
-     * @param IriConverterInterface     $iriConverter
      * @param PropertyAccessorInterface $propertyAccessor
      * @param array|null                $properties       Null to allow filtering on all properties with the exact strategy or a map of property name with strategy.
      */
-    public function __construct(ManagerRegistry $managerRegistry, RequestStack $requestStack, IriConverterInterface $iriConverter, PropertyAccessorInterface $propertyAccessor = null, array $properties = null)
+    public function __construct(ManagerRegistry $managerRegistry, RequestStack $requestStack, PropertyAccessorInterface $propertyAccessor = null, array $properties = null)
     {
         parent::__construct($managerRegistry, $properties);
 
         $this->requestStack = $requestStack;
-        $this->iriConverter = $iriConverter;
         $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
+    }
+
+    /**
+     * Sets the iri converter.
+     *
+     * Using a setter instead of injection the dependency in the constructor
+     * is required to avoid a circular reference.
+     *
+     * @param IriConverterInterface $iriConverter
+     */
+    public function setIriConverter(IriConverterInterface $iriConverter)
+    {
+        $this->iriConverter = $iriConverter;
     }
 
     /**
@@ -286,6 +297,10 @@ class SearchFilter extends AbstractFilter
      */
     private function getFilterValueFromUrl(string $value) : string
     {
+        if (null === $this->iriConverter) {
+            return $value;
+        }
+
         try {
             if ($item = $this->iriConverter->getItemFromIri($value)) {
                 return $this->propertyAccessor->getValue($item, 'id');

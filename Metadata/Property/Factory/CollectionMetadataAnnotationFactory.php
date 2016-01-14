@@ -49,7 +49,7 @@ final class CollectionMetadataAnnotationFactory implements CollectionMetadataFac
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, array $options) : CollectionMetadata
+    public function create(string $resourceClass, array $options = []) : CollectionMetadata
     {
         if ($this->decorated) {
             try {

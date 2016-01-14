@@ -25,5 +25,5 @@ interface EntrypointBuilderInterface
      *
      * @return array
      */
-    public function getEntrypoint(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array;
+    public function getEntrypoint(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array;
 }

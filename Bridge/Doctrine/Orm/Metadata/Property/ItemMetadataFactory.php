@@ -41,7 +41,7 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, string $property, array $options) : ItemMetadata
+    public function create(string $resourceClass, string $property, array $options = []) : ItemMetadata
     {
         $itemMetadata = $this->decorated->create($resourceClass, $property, $options);
 

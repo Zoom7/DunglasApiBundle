@@ -27,6 +27,8 @@ class ItemMetadataOperationFactory implements ItemMetadataFactoryInterface
 
     public function __construct(ItemMetadataFactoryInterface $decorated)
     {
+        var_dump($decorated);
+        die;
         $this->decorated = $decorated;
     }
 

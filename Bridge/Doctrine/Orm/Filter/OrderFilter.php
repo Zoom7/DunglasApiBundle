@@ -125,7 +125,7 @@ class OrderFilter extends AbstractFilter
     /**
      * {@inheritdoc}
      */
-    protected function extractProperties(Request $request)
+    protected function extractProperties(Request $request) : array
     {
         return $request->query->get($this->orderParameterName, []);
     }

@@ -31,5 +31,5 @@ interface CollectionMetadataFactoryInterface
      *
      * @throws ResourceClassNotFoundException
      */
-    public function create(string $resourceClass, array $options) : CollectionMetadata;
+    public function create(string $resourceClass, array $options = []) : CollectionMetadata;
 }

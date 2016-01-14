@@ -55,7 +55,7 @@ final class EntrypointBuilder implements EntrypointBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getEntrypoint(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
+    public function getEntrypoint(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
     {
         $entrypoint = [
             '@context' => $this->urlGenerator->generate('api_jsonld_context', ['shortName' => 'Entrypoint'], $referenceType),

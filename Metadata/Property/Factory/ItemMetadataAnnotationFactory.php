@@ -43,7 +43,7 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, string $property, array $options) : ItemMetadata
+    public function create(string $resourceClass, string $property, array $options = []) : ItemMetadata
     {
         $parentItemMetadata = null;
         if (isset($this->decorated)) {
@@ -93,7 +93,7 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
     /**
      * Returns the metadata from the decorated factory if available or throws an exception.
      *
-     * @param ItemMetadata|null $parentMetadata
+     * @param ItemMetadata|null $parentItemMetadata
      * @param string            $resourceClass
      * @param string            $property
      *
@@ -101,7 +101,7 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
      *
      * @throws PropertyNotFoundException
      */
-    private function handleNotFound(ItemMetadata $parentMetadata = null, string $resourceClass, string $property) : ItemMetadata
+    private function handleNotFound(ItemMetadata $parentItemMetadata = null, string $resourceClass, string $property) : ItemMetadata
     {
         if (isset($parentItemMetadata)) {
             return $parentItemMetadata;

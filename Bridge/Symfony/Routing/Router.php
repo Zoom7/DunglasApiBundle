@@ -11,7 +11,7 @@
 
 namespace Dunglas\ApiBundle\Bridge\Symfony\Routing;
 
-use DunglasApiBundle\Api\UrlGeneratorInterface;
+use Dunglas\ApiBundle\Api\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouterInterface;
@@ -82,7 +82,7 @@ final class Router implements RouterInterface, UrlGeneratorInterface
     /**
      * {@inheritdoc}
      */
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    public function generate($name, $parameters = [], $referenceType = self::ABS_PATH)
     {
         return $this->router->generate($name, $parameters, $referenceType);
     }

@@ -37,7 +37,7 @@ final class CollectionMetadataFactory implements CollectionMetadataFactoryInterf
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, array $options) : CollectionMetadata
+    public function create(string $resourceClass, array $options = []) : CollectionMetadata
     {
         return new CollectionMetadata($this->propertyInfo->getProperties($resourceClass, $options));
     }

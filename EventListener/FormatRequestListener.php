@@ -42,21 +42,23 @@ final class FormatRequestListener
     }
 
     /**
-     * Assign the format to use to the _api_format Request attribute.
+     * Assigns the format to use to the _api_format Request attribute.
      *
      * @param GetResponseEvent $event
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();
-        if (!$request->attributes->get('_resource_type')) {
+        if (!$request->attributes->get('_resource_class')) {
             return;
         }
 
         // Use the Symfony request format if available and applicable
         $format = $request->getRequestFormat(null);
+
         if (null === $format || !in_array($format, $this->supportedFormats)) {
             if (null !== $accept = $request->headers->get('Accept')) {
+
                 // Try to guess the best format to use
                 $format = $this->formatNegotiator->getBestFormat($accept, $this->supportedFormats);
             }

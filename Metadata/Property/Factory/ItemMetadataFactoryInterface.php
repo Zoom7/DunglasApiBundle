@@ -32,5 +32,5 @@ interface ItemMetadataFactoryInterface
      *
      * @throws PropertyNotFoundException
      */
-    public function create(string $resourceClass, string $property, array $options) : ItemMetadata;
+    public function create(string $resourceClass, string $property, array $options = []) : ItemMetadata;
 }

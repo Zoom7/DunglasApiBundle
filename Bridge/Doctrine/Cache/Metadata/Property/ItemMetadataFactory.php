@@ -43,8 +43,9 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function create(string $resourceClass, string $property, array $options) : ItemMetadata
+    public function create(string $resourceClass, string $property, array $options = []) : ItemMetadata
     {
+        //
         $key = sprintf(self::KEY_PATTERN, $property, serialize($options));
 
         if ($this->cache->contains($key)) {
