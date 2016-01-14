@@ -62,7 +62,6 @@ trait ContextTrait
     private function createRelationContext(string $resourceClass, array $context) : array
     {
         $context['resource_class'] = $resourceClass;
-        unset($context['object_to_populate']);
 
         return $context;
     }
