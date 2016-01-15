@@ -24,7 +24,6 @@ use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
-use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -124,15 +123,15 @@ final class ItemNormalizer extends AbstractNormalizer
 
         $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
         $resourceItemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
-        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
         $data = $this->addJsonLdContext($this->contextBuilder, $resourceClass, $context);
+        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
         $propertyNames = $this->propertyCollectionMetadataFactory->create($resourceClass, $this->getPropertyCollectionFactoryContext($context));
 
         $data['@id'] = $this->iriConverter->getIriFromItem($object);
-        $data['@type'] = ($iri = $resourceItemMetadata->getIri()) ? $iri : $resourceClass->getShortName();
+        $data['@type'] = ($iri = $resourceItemMetadata->getIri()) ? $iri : $resourceItemMetadata->getShortName();
 
         foreach ($propertyNames as $propertyName) {
-            $propertyItemMetadata = $this->propertyItemMetadataFactory->create($propertyName);
+            $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
 
             if ($propertyItemMetadata->isIdentifier() || !$propertyItemMetadata->isReadable()) {
                 continue;
@@ -334,7 +333,7 @@ final class ItemNormalizer extends AbstractNormalizer
      */
     private function denormalizeRelation(string $resourceClass, string $attributeName, PropertyItemMetadata $propertyItemMetadata, string $className, $value, array $context)
     {
-        if (!$this->resourceClassResolver->isResourceClass($className) || !$propertyItemMetadata->isWritableLink()) {
+        if (!$this->resourceClassResolver->isResourceClass($className) || $propertyItemMetadata->isWritableLink()) {
             return $this->serializer->denormalize($value, $className, self::FORMAT, $this->createRelationContext($resourceClass, $context));
         }
 

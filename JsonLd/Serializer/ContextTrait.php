@@ -69,7 +69,7 @@ trait ContextTrait
     /**
      * Gets a context value.
      *
-     * @param ResourceItemMetadata $resourceItemMetadata
+     * @param ItemMetadata $resourceItemMetadata
      * @param array                $context
      * @param string               $key
      * @param mixed                $defaultValue
@@ -112,6 +112,7 @@ trait ContextTrait
         if (isset($context['jsonld_has_context'])) {
             return $data;
         }
+
         if (isset($context['jsonld_embed_context'])) {
             $data['@context'] = $contextBuilder->getResourceContext($resourceClass);
 

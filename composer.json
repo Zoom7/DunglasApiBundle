@@ -12,6 +12,12 @@
       "homepage": "http://dunglas.fr"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/dunglas/DoctrineBundle"
+    }
+  ],
   "require": {
     "php": ">=7.0",
     "symfony/serializer": "dev-master",
@@ -33,7 +39,7 @@
     "symfony/finder": "~2.3",
     "symfony/security": "~2.7.2|~3.0",
     "doctrine/orm": "~2.2,>=2.2.3",
-    "doctrine/doctrine-bundle": "~1.2",
+    "doctrine/doctrine-bundle": "dev-property_info",
     "php-mock/php-mock-phpunit": "~1.1"
   },
   "suggest": {

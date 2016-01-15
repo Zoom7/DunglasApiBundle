@@ -48,16 +48,17 @@ final class ManagerViewListener
             return;
         }
 
-        $resourceType = $request->attributes->get('_resource_type');
-        if (!$resourceType) {
+        $resourceClass = $request->attributes->get('_resource_class');
+        if (!$resourceClass) {
             return;
         }
 
         $controllerResult = $event->getControllerResult();
 
-        if (null === $objectManager = $this->getManager($resourceType, $controllerResult)) {
+        if (null === $objectManager = $this->getManager($resourceClass, $controllerResult)) {
             return $controllerResult;
         }
+
         switch ($request->getMethod()) {
             case Request::METHOD_POST:
                 $objectManager->persist($controllerResult);
@@ -75,17 +76,17 @@ final class ManagerViewListener
     /**
      * Gets the manager if applicable.
      *
-     * @param ResourceInterface $resourceType
-     * @param mixed             $data
+     * @param string $resourceType
+     * @param mixed  $data
      *
      * @return ObjectManager|null
      */
-    private function getManager(ResourceInterface $resourceType, $data)
+    private function getManager(string $resourceClass, $data)
     {
-        $objectManager = $this->managerRegistry->getManagerForClass($resourceType->getEntityClass());
+        $objectManager = $this->managerRegistry->getManagerForClass($resourceClass);
 
         if (null === $objectManager || !is_object($data)) {
-            return;
+            return null;
         }
 
         return $objectManager;

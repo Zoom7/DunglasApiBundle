@@ -11,6 +11,7 @@
 
 namespace Dunglas\ApiBundle\Bridge\Symfony\PropertyInfo\Metadata\Property;
 
+use Dunglas\ApiBundle\Exception\PropertyNotFoundException;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\ItemMetadata;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
@@ -28,11 +29,11 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
     private $propertyInfo;
 
     /**
-     * @var ItemMetadataFactoryInterface
+     * @var ItemMetadataFactoryInterface|null
      */
     private $decorated;
 
-    public function __construct(PropertyInfoExtractorInterface $propertyInfo, ItemMetadataFactoryInterface $decorated)
+    public function __construct(PropertyInfoExtractorInterface $propertyInfo, ItemMetadataFactoryInterface $decorated = null)
     {
         $this->propertyInfo = $propertyInfo;
         $this->decorated = $decorated;
@@ -43,11 +44,17 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
      */
     public function create(string $resourceClass, string $name, array $options = []) : ItemMetadata
     {
-        $itemMetadata = $this->decorated->create($resourceClass, $name, $options);
+        if (null !== $this->decorated) {
+            try {
+                $itemMetadata = $this->decorated->create($resourceClass, $name, $options);
+            } catch (PropertyNotFoundException $propertyNotFoundException) {
+                $itemMetadata = new ItemMetadata();
+            }
+        }
         if (null === $itemMetadata->getType()) {
             $types = $this->propertyInfo->getTypes($resourceClass, $name, $options);
             if (isset($types[0])) {
-                $itemMetadata = $itemMetadata->withType($types);
+                $itemMetadata = $itemMetadata->withType($types[0]);
             }
         }
 

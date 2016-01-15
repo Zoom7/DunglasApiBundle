@@ -17,6 +17,7 @@ use Dunglas\ApiBundle\Exception\InvalidArgumentException;
 use Dunglas\ApiBundle\Metadata\Property\Factory\CollectionMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Api\DataProviderInterface;
+use Dunglas\ApiBundle\Util\ClassInfoTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Routing\Exception\ExceptionInterface;
@@ -29,6 +30,8 @@ use Symfony\Component\Routing\RouterInterface;
  */
 final class IriConverter implements IriConverterInterface
 {
+    use ClassInfoTrait;
+
     /**
      * @var CollectionMetadataFactoryInterface
      */
@@ -90,7 +93,7 @@ final class IriConverter implements IriConverterInterface
      */
     public function getIriFromItem($item, int $referenceType = UrlGeneratorInterface::ABS_PATH) : string
     {
-        $resourceClass = get_class($item);
+        $resourceClass = $this->getObjectClass($item);
         $routeName = $this->getRouteName($resourceClass, false);
 
         $identifierValues = [];
@@ -132,8 +135,8 @@ final class IriConverter implements IriConverterInterface
         $operationType = $collection ? 'collection' : 'item';
 
         foreach ($this->router->getRouteCollection()->all() as $routeName => $route) {
-            $currentResourceClass = $route->getOption('_resource_class');
-            $operation = $route->getOption(sprintf('_%s_operation_name', $operationType));
+            $currentResourceClass = $route->getDefault('_resource_class');
+            $operation = $route->getDefault(sprintf('_%s_operation_name', $operationType));
             $methods = $route->getMethods();
 
             if ($resourceClass === $currentResourceClass && null !== $operation && (empty($methods) || in_array('GET', $methods))) {

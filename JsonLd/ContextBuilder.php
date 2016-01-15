@@ -68,7 +68,7 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
+    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
     {
         return [
             '@vocab' => $this->urlGenerator->generate('api_hydra_vocab', [], $referenceType).'#',
@@ -79,7 +79,7 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getEntrypointContext(string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
+    public function getEntrypointContext(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
     {
         $context = $this->getBaseContext($referenceType);
 
@@ -100,7 +100,7 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getResourceContext(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : array
+    public function getResourceContext(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
     {
         $context = $this->getBaseContext($referenceType);
 
@@ -134,7 +134,7 @@ final class ContextBuilder implements ContextBuilderInterface
         return $context;
     }
 
-    public function getResourceContextUri(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) : string
+    public function getResourceContextUri(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABS_PATH) : string
     {
         $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
 
