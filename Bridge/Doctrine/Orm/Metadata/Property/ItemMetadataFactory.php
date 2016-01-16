@@ -60,7 +60,6 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
         }
 
         $identifiers = $doctrineClassMetadata->getIdentifier();
-
         foreach ($identifiers as $identifier) {
             if ($identifier === $property) {
                 $itemMetadata = $itemMetadata->withIdentifier(true);

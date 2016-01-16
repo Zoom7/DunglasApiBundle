@@ -58,7 +58,6 @@ final class FormatRequestListener
 
         if (null === $format || !in_array($format, $this->supportedFormats)) {
             if (null !== $accept = $request->headers->get('Accept')) {
-
                 // Try to guess the best format to use
                 $format = $this->formatNegotiator->getBestFormat($accept, $this->supportedFormats);
             }

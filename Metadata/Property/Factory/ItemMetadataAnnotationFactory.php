@@ -121,8 +121,9 @@ final class ItemMetadataAnnotationFactory implements ItemMetadataFactoryInterfac
                 $annotation->readableLink,
                 $annotation->writableLink,
                 $annotation->required,
+                $annotation->identifier,
                 $annotation->iri,
-                $annotation->identifier
+                $annotation->attributes
             );
         }
 

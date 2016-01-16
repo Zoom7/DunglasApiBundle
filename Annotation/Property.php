@@ -64,5 +64,5 @@ final class Property
     /**
      * @var array
      */
-    public $attributes;
+    public $attributes = [];
 }

@@ -5,7 +5,7 @@ Feature: Content Negotiation support
 
   @createSchema
   Scenario: Post an XML body
-    When I add "HTTP_Accept" header equal to "application/xml"
+    When I add "Accept" header equal to "application/xml"
     And I send a "POST" request to "/dummies" with body:
     """
     <root>
@@ -21,23 +21,23 @@ Feature: Content Negotiation support
 
   @dropSchema
   Scenario: Requesting an unknown format should return JSON-LD
-    When I add "HTTP_Accept" header equal to "text/plain"
+    When I add "Accept" header equal to "text/plain"
     And I send a "GET" request to "/dummies/1"
     Then the header "Content-Type" should be equal to "application/ld+json"
     And the JSON should be equal to:
     """
-     {
-        "@context": "/contexts/Dummy",
-        "@id": "/dummies/1",
-        "@type": "Dummy",
-        "name": "XML!",
-        "alias": null,
-        "description": null,
-        "dummyDate": null,
-        "jsonData": [],
-        "relatedDummy": null,
-        "dummy": null,
-        "relatedDummies": [],
-        "name_converted": null
+    {        
+      "@context": "/contexts/Dummy",
+      "@id": "/dummies/1",
+      "@type": "Dummy",
+      "description": null,
+      "dummy": null,
+      "dummyDate": null,
+      "relatedDummy": null,
+      "relatedDummies": [],
+      "jsonData": [],
+      "name_converted": null,
+      "name": "XML!",
+      "alias": null
     }
     """

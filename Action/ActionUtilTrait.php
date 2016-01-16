@@ -71,7 +71,7 @@ trait ActionUtilTrait
         }
 
         $format = $request->attributes->get('_api_format');
-        if (!$resourceClass || !$format) {
+        if (!$format) {
             throw new RuntimeException('The request attribute "_api_format" must be defined.');
         }
 
