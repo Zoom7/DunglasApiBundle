@@ -50,7 +50,7 @@ final class Configuration implements ConfigurationInterface
                             ->canBeDisabled()
                             ->addDefaultsIfNotSet()
                             ->children()
-                                ->booleanNode('enabled')->defaultFalse()->info('To enable or disable pagination for all resource collections by default.')->end()
+                                ->booleanNode('enabled')->defaultTrue()->info('To enable or disable pagination for all resource collections by default.')->end()
                                 ->booleanNode('client_enabled')->defaultFalse()->info('To allow the client to enable or disable the pagination.')->end()
                                 ->booleanNode('client_items_per_page')->defaultFalse()->info('To allow the client to set the number of items per page.')->end()
                                 ->integerNode('items_per_page')->defaultValue(30)->info('The default number of items per page.')->end()

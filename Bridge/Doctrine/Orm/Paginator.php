@@ -13,7 +13,7 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm;
 
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrineOrmPaginator;
 use Doctrine\ORM\Query;
-use Dunglas\ApiBundle\Model\PaginatorInterface;
+use Dunglas\ApiBundle\Api\PaginatorInterface;
 
 /**
  * Decorates the Doctrine ORM paginator.

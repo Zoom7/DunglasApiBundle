@@ -88,8 +88,8 @@ final class CollectionFiltersNormalizer extends SerializerAwareNormalizer implem
         }
 
         $currentFilters = [];
-        foreach ($this->filters as $filerName => $filter) {
-            if (isset($resourceFilters[$filerName])) {
+        foreach ($this->filters as $filterName => $filter) {
+            if (in_array($filterName, $resourceFilters)) {
                 $currentFilters[] = $filter;
             }
         }

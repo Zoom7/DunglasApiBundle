@@ -14,6 +14,7 @@ namespace Dunglas\ApiBundle\Hydra\Serializer;
 use Dunglas\ApiBundle\Api\ResourceClassResolverInterface;
 use Dunglas\ApiBundle\Api\PaginatorInterface;
 use Dunglas\ApiBundle\Exception\InvalidArgumentException;
+use Dunglas\ApiBundle\JsonLd\Serializer\ContextTrait;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\SerializerAwareNormalizer;
@@ -27,6 +28,8 @@ use Symfony\Component\Serializer\SerializerInterface;
  */
 class PagedCollectionNormalizer extends SerializerAwareNormalizer implements NormalizerInterface
 {
+    use ContextTrait;
+
     const HYDRA_PAGED_COLLECTION = 'hydra:PagedCollection';
 
     /**
@@ -42,18 +45,18 @@ class PagedCollectionNormalizer extends SerializerAwareNormalizer implements Nor
     /**
      * @var ResourceClassResolverInterface
      */
-    private $resourceResolver;
+    private $resourceClassResolver;
 
     /**
      * @var string
      */
     private $pageParameterName;
 
-    public function __construct(NormalizerInterface $collectionNormalizer, ItemMetadataFactoryInterface $itemMetadataFactory, ResourceClassResolverInterface $resourceResolver, string $pageParameterName)
+    public function __construct(NormalizerInterface $collectionNormalizer, ItemMetadataFactoryInterface $itemMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, string $pageParameterName)
     {
         $this->collectionNormalizer = $collectionNormalizer;
         $this->itemMetadataFactory = $itemMetadataFactory;
-        $this->resourceResolver = $resourceResolver;
+        $this->resourceClassResolver = $resourceClassResolver;
         $this->pageParameterName = $pageParameterName;
     }
 
@@ -67,7 +70,7 @@ class PagedCollectionNormalizer extends SerializerAwareNormalizer implements Nor
             return $data;
         }
 
-        $resourceClass = $this->resourceResolver->getResourceClass($object, $context);
+        $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
         $itemMetadata = $this->itemMetadataFactory->create($resourceClass);
 
         if (isset($context['collection_operation_name'])) {
@@ -96,11 +99,6 @@ class PagedCollectionNormalizer extends SerializerAwareNormalizer implements Nor
         $data['hydra:itemsPerPage'] = $object->getItemsPerPage();
         $data['hydra:firstPage'] = $this->getPageUrl($pageParameterName, $parts, $parameters, 1.);
         $data['hydra:lastPage'] = $this->getPageUrl($pageParameterName, $parts, $parameters, $lastPage);
-
-        // Reorder the hydra:member key to the end
-        $members = $data['hydra:member'];
-        unset($data['hydra:member']);
-        $data['hydra:member'] = $members;
 
         return $data;
     }
