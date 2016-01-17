@@ -51,8 +51,6 @@ final class DunglasApiExtension extends Extension implements PrependExtensionInt
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        echo 'here';
-        var_dump($config['collection']['pagination']['enabled']);
         $container->setParameter('api.title', $config['title']);
         $container->setParameter('api.description', $config['description']);
         $container->setParameter('api.supported_formats', $config['supported_formats']);
