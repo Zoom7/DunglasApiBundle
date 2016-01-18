@@ -50,6 +50,6 @@ final class DeleteItemAction
     {
         list($resourceClass, , $operationName) = $this->extractAttributes($request);
 
-        return $this->getItem($this->dataProvider, $resourceClass, $id, $operationName);
+        return $this->getItem($this->dataProvider, $resourceClass, $operationName, $id);
     }
 }
