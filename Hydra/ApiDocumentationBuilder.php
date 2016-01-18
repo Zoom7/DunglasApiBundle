@@ -109,8 +109,8 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
 
             $collectionOperations = [];
             if ($itemOperations = $resourceItemMetadata->getCollectionOperations()) {
-                foreach ($itemOperations as $collectionOperation) {
-                    $collectionOperations[] = $this->getHydraOperation($resourceClass, $resourceItemMetadata, $collectionOperation, $prefixedShortName, true);
+                foreach ($itemOperations as $operationName => $collectionOperation) {
+                    $collectionOperations[] = $this->getHydraOperation($resourceClass, $resourceItemMetadata, $operationName, $collectionOperation, $prefixedShortName, true);
                 }
             }
 
@@ -144,7 +144,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
 
             $properties = [];
             foreach ($this->propertyCollectionMetadataFactory->create($resourceClass) as $propertyName) {
-                $propertyItemMetadata = $this->propertyItemMetadataFactory->create($propertyName);
+                $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
 
                 if ($propertyItemMetadata->isIdentifier() && !$propertyItemMetadata->isWritable()) {
                     continue;
@@ -185,8 +185,8 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
             $itemOperations = [];
 
             if ($operations = $resourceItemMetadata->getItemOperations()) {
-                foreach ($operations as $itemOperation) {
-                    $itemOperations[] = $this->getHydraOperation($resourceClass, $itemOperation, $prefixedShortName, false);
+                foreach ($operations as $operationName => $itemOperation) {
+                    $itemOperations[] = $this->getHydraOperation($resourceClass, $resourceItemMetadata, $operationName, $itemOperation, $prefixedShortName, false);
                 }
             }
 
@@ -384,7 +384,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
     {
         $type = $propertyItemMetadata->getType();
         if (!$type) {
-            return;
+            return null;
         }
 
         if ($type->isCollection() && $collectionType = $type->getCollectionValueType()) {
@@ -412,14 +412,15 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                         return 'xmls:dateTime';
                     }
 
-                    if ($resource = $this->resourceClassResolver->isResourceClass($type->getClassName())) {
-                        return sprintf('#%s', $resource->getShortName());
+                    $className = $type->getClassName();
+                    if ($this->resourceClassResolver->isResourceClass($className)) {
+                        return sprintf('#%s', $this->resourceItemMetadataFactory->create($className)->getShortName());
                     }
                 }
             break;
         }
 
-        return;
+        return null;
     }
 
     /**

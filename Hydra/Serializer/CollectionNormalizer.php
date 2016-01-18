@@ -83,8 +83,8 @@ final class CollectionNormalizer extends SerializerAwareNormalizer implements No
 
         $resourceClass = $this->getResourceClass($this->resourceClassResolver, $object, $context);
         $resourceItemMetadata = $this->itemMetadataFactory->create($resourceClass);
-        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
         $data = $this->addJsonLdContext($this->contextBuilder, $resourceClass, $context);
+        $context = $this->createContext($resourceClass, $resourceItemMetadata, $context, true);
 
         $data['@id'] = $context['request_uri'];
         $data['@type'] = self::HYDRA_COLLECTION;

@@ -34,7 +34,7 @@ class CustomIdentifierDummy
     /**
      * @var string The dummy name.
      *
-     * @ORM\Column(name="name", type="string", length=30)
+     * @ORM\Column(length=30)
      */
     private $name;
 

@@ -80,6 +80,7 @@ Feature: Create-Retrieve-Update-Delete
     And the JSON should be equal to:
     """
     {
+        "@context": "/contexts/Dummy",
         "@id": "/dummies",
         "@type": "hydra:PagedCollection",
         "hydra:member": [

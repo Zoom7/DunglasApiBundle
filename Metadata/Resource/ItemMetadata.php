@@ -226,7 +226,7 @@ final class ItemMetadata
     private function getOperationAttribute(array $operations, string $operationName, string $key, $defaultValue = null, bool $resourceFallback = false)
     {
         if (isset($operations[$operationName][$key])) {
-            return isset($operations[$operationName][$key]);
+            return $operations[$operationName][$key];
         }
 
         if ($resourceFallback && isset($this->attributes[$key])) {

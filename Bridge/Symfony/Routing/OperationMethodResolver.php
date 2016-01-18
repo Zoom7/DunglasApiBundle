@@ -79,7 +79,7 @@ class OperationMethodResolver implements OperationMethodResolverInterface
         }
 
         if (null === $routeName) {
-            throw new RuntimeException('Either a "route_name" or a "method" operation attribute must exist.');
+            throw new RuntimeException(sprintf('Either a "route_name" or a "method" operation attribute must exist for the operation "%s" of the resource "%s".', $operationName, $resourceClass));
         }
 
         /*
@@ -97,6 +97,6 @@ class OperationMethodResolver implements OperationMethodResolverInterface
             }
         }
 
-        throw new RuntimeException('Route "%s" not found.', $routeName);
+        throw new RuntimeException(sprintf('Route "%s" not found for the operation "%s" of the resource "%s".', $routeName, $operationName, $resourceClass));
     }
 }
