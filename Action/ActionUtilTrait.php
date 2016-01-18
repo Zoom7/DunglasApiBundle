@@ -37,8 +37,6 @@ trait ActionUtilTrait
      */
     private function getItem(DataProviderInterface $dataProvider, string $resourceClass, string $operationName, $id)
     {
-        var_dump($resourceClass);
-        var_dump($id);
         $data = $dataProvider->getItem($resourceClass, $id, $operationName, true);
         if (!$data) {
             throw new NotFoundHttpException('Not Found');
