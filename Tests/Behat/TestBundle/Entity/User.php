@@ -14,6 +14,7 @@ namespace Dunglas\ApiBundle\Tests\Behat\TestBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Dunglas\ApiBundle\Annotation\Resource;
 use FOS\UserBundle\Model\User as BaseUser;
+use FOS\UserBundle\Model\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -40,7 +41,6 @@ class User extends BaseUser
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"user"})
      */
     protected $email;
@@ -63,7 +63,6 @@ class User extends BaseUser
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"user"})
      */
     protected $username;
@@ -86,5 +85,13 @@ class User extends BaseUser
     public function getFullname()
     {
         return $this->fullname;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isUser(UserInterface $user = null)
+    {
+        return $user instanceof self && $user->id === $this->id;
     }
 }

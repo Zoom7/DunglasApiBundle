@@ -10,10 +10,11 @@ framework:
         enable_annotations:            true
     serializer:
         enable_annotations:            true
-    trusted_proxies: ~
-    test: ~
+    trusted_proxies:                   ~
+    test:                              ~
     session:
         storage_id:                    'session.storage.mock_file'
+    form:                              ~ # For FOSUser
 
 doctrine:
     dbal:
@@ -52,7 +53,7 @@ services:
             -  '@security.encoder_factory'
             -  '@fos_user.util.username_canonicalizer'
             -  '@fos_user.util.email_canonicalizer'
-            -  '@fos_user.entity_manager'
+            -  '@fos_user.object_manager'
             -  '%fos_user.model.user.class%'
 
     fos_user.mailer.default:
