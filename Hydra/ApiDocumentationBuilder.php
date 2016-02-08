@@ -142,8 +142,19 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                 $class['hydra:description'] = $description;
             }
 
+            $attributes = $resourceItemMetadata->getAttributes();
+            $context = [];
             $properties = [];
-            foreach ($this->propertyCollectionMetadataFactory->create($resourceClass) as $propertyName) {
+
+            if (isset($attributes['normalization_context']['groups'])) {
+                $context['serializer_groups'] = $attributes['normalization_context']['groups'];
+            }
+
+            if (isset($attributes['denormalization_context']['groups'])) {
+                $context['serializer_groups'] = isset($context['serializer_groups']) ? array_merge($context['serializer_groups'], $attributes['denormalization_context']['groups']) : $context['serializer_groups'];
+            }
+
+            foreach ($this->propertyCollectionMetadataFactory->create($resourceClass, $context) as $propertyName) {
                 $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
 
                 if ($propertyItemMetadata->isIdentifier() && !$propertyItemMetadata->isWritable()) {

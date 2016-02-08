@@ -63,9 +63,10 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
         foreach ($identifiers as $identifier) {
             if ($identifier === $property) {
                 $itemMetadata = $itemMetadata->withIdentifier(true);
+                $itemMetadata = $itemMetadata->withReadable(false);
 
                 if ($doctrineClassMetadata->isIdentifierNatural()) {
-                    $itemMetadata = $itemMetadata->withWritable(false);
+                    $itemMetadata = $itemMetadata->withWritable(true);
                 }
 
                 break;
