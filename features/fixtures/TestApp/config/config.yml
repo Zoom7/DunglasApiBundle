@@ -70,22 +70,17 @@ services:
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.view', method: 'onKernelView' }
 
-    ressource.date_filter:
-        parent:    'api.doctrine.orm.date_filter'
-        arguments: [ { 'dummyDate': ~, 'relatedDummy.dummyDate': ~ } ]
-        tags:      [ { name: 'api.filter', id: 'date' } ]
-
     my_dummy_resource.search_filter:
-        parent:                     'api.doctrine.orm.search_filter'
-        arguments:                  [ { 'id': 'exact', 'name': 'partial', 'alias': 'start', 'description': 'word_start', 'relatedDummy.name': 'exact', 'relatedDummies': 'exact'  } ]
-        tags:                       [ { name: 'api.filter', id: 'my_dummy.search' } ]
+        parent:    'api.doctrine.orm.search_filter'
+        arguments: [ { 'id': 'exact', 'name': 'partial', 'alias': 'start', 'description': 'word_start', 'relatedDummy.name': 'exact', 'relatedDummies': 'exact'  } ]
+        tags:      [ { name: 'api.filter', id: 'my_dummy.search' } ]
 
     my_dummy_resource.order_filter:
-        parent:                     'api.doctrine.orm.order_filter'
-        arguments:                  [ { 'id': ~, 'name': 'desc', 'relatedDummy.symfony': ~ } ]
-        tags:                       [ { name: 'api.filter', id: 'my_dummy.order' } ]
+        parent:    'api.doctrine.orm.order_filter'
+        arguments: [ { 'id': ~, 'name': 'desc', 'relatedDummy.symfony': ~ } ]
+        tags:      [ { name: 'api.filter', id: 'my_dummy.order' } ]
 
     my_dummy_resource.date_filter:
-            parent:                 'api.doctrine.orm.date_filter'
-            arguments:              [ { 'dummyDate': ~, 'relatedDummy.dummyDate': ~ } ]
-            tags:                       [ { name: 'api.filter', id: 'my_dummy.date' } ]
+        parent:    'api.doctrine.orm.date_filter'
+        arguments: [ { 'dummyDate': ~, 'relatedDummy.dummyDate': ~ } ]
+        tags:      [ { name: 'api.filter', id: 'my_dummy.date' } ]

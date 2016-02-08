@@ -13,7 +13,7 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Extension;
 
 use Doctrine\ORM\QueryBuilder;
 use Dunglas\ApiBundle\Api\FilterCollection;
-use Dunglas\ApiBundle\Doctrine\Orm\Filter\FilterInterface;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter\FilterInterface;
 use Dunglas\ApiBundle\Metadata\Resource\Factory\ItemMetadataFactoryInterface;
 
 /**
@@ -53,7 +53,7 @@ final class FilterExtension implements QueryCollectionExtensionInterface
         }
 
         foreach ($this->filters as $filterName => $filter) {
-            if (isset($resourceFilters[$filterName]) && $filter instanceof FilterInterface) {
+            if (in_array($filterName, $resourceFilters) && $filter instanceof FilterInterface) {
                 $filter->apply($queryBuilder, $resourceClass, $operationName);
             }
         }

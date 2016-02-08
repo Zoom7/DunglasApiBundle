@@ -13,7 +13,7 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryNameGenerator;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 

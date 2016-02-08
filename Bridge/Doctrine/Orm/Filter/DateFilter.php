@@ -13,7 +13,7 @@ namespace Dunglas\ApiBundle\Bridge\Doctrine\Orm\Filter;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Doctrine\Orm\Util\QueryNameGenerator;
+use Dunglas\ApiBundle\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -62,8 +62,7 @@ class DateFilter extends AbstractFilter
      */
     public function apply(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
-        $request = $this->requestStack->getCurrentRequest();
-        if (null === $request) {
+        if (null === ($request = $this->requestStack->getCurrentRequest())) {
             return;
         }
 
