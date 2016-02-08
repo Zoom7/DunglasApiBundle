@@ -60,16 +60,6 @@ class RelatedDummy extends ParentDummy
      */
     public $thirdLevel;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="UnknownDummy", cascade={"persist"})
-     */
-    public $unknown;
-
-    public function setUnknown()
-    {
-        $this->unknown = new UnknownDummy();
-    }
-
     public function getId()
     {
         return $this->id;

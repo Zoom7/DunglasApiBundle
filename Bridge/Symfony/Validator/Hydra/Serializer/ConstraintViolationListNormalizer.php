@@ -48,7 +48,7 @@ final class ConstraintViolationListNormalizer implements NormalizerInterface
             ];
 
             $propertyPath = $violation->getPropertyPath();
-            $prefix = $propertyPath ? srpintf('%s: ', $propertyPath) : '';
+            $prefix = $propertyPath ? sprintf('%s: ', $propertyPath) : '';
 
             $message .= $prefix.$violation->getMessage()."\n";
         }
