@@ -442,7 +442,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
     private function getContext() : array
     {
         return array_merge(
-            $this->contextBuilder->getBaseContext(),
+            $this->contextBuilder->getBaseContext(UrlGeneratorInterface::ABS_URL),
             [
                 'rdf' => ContextBuilderInterface::RDF_NS,
                 'rdfs' => ContextBuilderInterface::RDFS_NS,
