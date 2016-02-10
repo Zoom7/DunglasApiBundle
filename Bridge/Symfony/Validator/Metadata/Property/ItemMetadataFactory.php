@@ -14,6 +14,8 @@ namespace Dunglas\ApiBundle\Bridge\Symfony\Validator\Metadata\Property;
 use Dunglas\ApiBundle\Metadata\Property\Factory\ItemMetadataFactoryInterface;
 use Dunglas\ApiBundle\Metadata\Property\ItemMetadata;
 use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Mapping\Factory\MetadataFactoryInterface;
 
 /**
@@ -26,10 +28,7 @@ final class ItemMetadataFactory implements ItemMetadataFactoryInterface
     /**
      * @var string[] A list of constraint classes making the entity required.
      */
-    const REQUIRED_CONSTRAINTS = [
-        'Symfony\Component\Validator\Constraints\NotBlank',
-        'Symfony\Component\Validator\Constraints\NotNull',
-    ];
+    const REQUIRED_CONSTRAINTS = [NotBlank::class, NotNull::class];
 
     /**
      * @var LoaderInterface

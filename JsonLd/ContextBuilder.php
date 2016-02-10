@@ -68,10 +68,10 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getBaseContext(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
+    public function getBaseContext(int $referenceType = UrlGeneratorInterface::ABS_URL) : array
     {
         return [
-            '@vocab' => $this->urlGenerator->generate('api_hydra_vocab', [], $referenceType).'#',
+            '@vocab' => $this->urlGenerator->generate('api_hydra_vocab', [], UrlGeneratorInterface::ABS_URL).'#',
             'hydra' => self::HYDRA_NS,
         ];
     }
@@ -79,7 +79,7 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getEntrypointContext(string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
+    public function getEntrypointContext(int $referenceType = UrlGeneratorInterface::ABS_PATH) : array
     {
         $context = $this->getBaseContext($referenceType);
 
@@ -100,18 +100,16 @@ final class ContextBuilder implements ContextBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function getResourceContext(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABS_PATH) : array
+    public function getResourceContext(string $resourceClass, int $referenceType = UrlGeneratorInterface::ABS_PATH) : array
     {
-        $context = $this->getBaseContext($referenceType);
-
+        $context = $this->getBaseContext($referenceType, $referenceType);
         $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
-
         $prefixedShortName = sprintf('#%s', $itemMetadata->getShortName());
 
         foreach ($this->propertyCollectionMetadataFactory->create($resourceClass) as $propertyName) {
             $propertyItemMetadata = $this->propertyItemMetadataFactory->create($resourceClass, $propertyName);
 
-            if (!$propertyItemMetadata->isIdentifier()) {
+            if ($propertyItemMetadata->isIdentifier() && !$propertyItemMetadata->isWritable()) {
                 continue;
             }
 
@@ -121,7 +119,7 @@ final class ContextBuilder implements ContextBuilderInterface
                 $id = sprintf('%s/%s', $prefixedShortName, $convertedName);
             }
 
-            if ($propertyItemMetadata->isReadableLink()) {
+            if (!$propertyItemMetadata->isReadableLink()) {
                 $context[$convertedName] = [
                     '@id' => $id,
                     '@type' => '@id',
@@ -134,7 +132,7 @@ final class ContextBuilder implements ContextBuilderInterface
         return $context;
     }
 
-    public function getResourceContextUri(string $resourceClass, string $referenceType = UrlGeneratorInterface::ABS_PATH) : string
+    public function getResourceContextUri(string $resourceClass, int $referenceType = UrlGeneratorInterface::ABS_PATH) : string
     {
         $itemMetadata = $this->resourceItemMetadataFactory->create($resourceClass);
 

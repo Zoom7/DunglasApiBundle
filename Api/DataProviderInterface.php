@@ -47,4 +47,6 @@ interface DataProviderInterface
      * @return array|PaginatorInterface|\Traversable
      */
     public function getCollection(string $resourceClass, string $operationName = null);
+
+    // Missing supports
 }

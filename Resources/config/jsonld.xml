@@ -55,7 +55,8 @@
 
         <service id="api.jsonld.action.context" class="Dunglas\ApiBundle\JsonLd\Action\ContextAction">
             <argument type="service" id="api.jsonld.context_builder" />
-            <argument type="service" id="api.metadata.property.factory.collection" />
+            <argument type="service" id="api.metadata.resource.factory.collection" />
+            <argument type="service" id="api.metadata.resource.factory.item" />
         </service>
 
         <service id="api.jsonld.action.entrypoint" class="Dunglas\ApiBundle\JsonLd\Action\EntrypointAction">

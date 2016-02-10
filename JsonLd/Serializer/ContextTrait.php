@@ -38,17 +38,17 @@ trait ContextTrait
         }
 
         $key = $normalization ? 'normalization_context' : 'denormalization_context';
-        $context += $this->getContextValue($itemMetadata, $context, $key, []);
+        $context = array_merge($context, $this->getContextValue($itemMetadata, $context, $key, []));
 
         if (!isset($context['resource_class'])) {
             $context['resource_class'] = $resourceClass;
         }
 
-        return $context + [
+        return array_merge($context, [
             'jsonld_has_context' => true,
             // Don't use hydra:Collection in sub levels
             'jsonld_sub_level' => true,
-        ];
+        ]);
     }
 
     /**
@@ -62,6 +62,8 @@ trait ContextTrait
     private function createRelationContext(string $resourceClass, array $context) : array
     {
         $context['resource_class'] = $resourceClass;
+        unset($context['item_operation']);
+        unset($context['collection_operation']);
 
         return $context;
     }
@@ -70,9 +72,9 @@ trait ContextTrait
      * Gets a context value.
      *
      * @param ItemMetadata $resourceItemMetadata
-     * @param array                $context
-     * @param string               $key
-     * @param mixed                $defaultValue
+     * @param array        $context
+     * @param string       $key
+     * @param mixed        $defaultValue
      *
      * @return mixed
      */
@@ -87,7 +89,7 @@ trait ContextTrait
         }
 
         if (isset($context['item_operation_name'])) {
-            return $resourceItemMetadata->getCollectionOperationAttribute($context['item_operation_name'], $key, $defaultValue, true);
+            return $resourceItemMetadata->getItemOperationAttribute($context['item_operation_name'], $key, $defaultValue, true);
         }
 
         return $resourceItemMetadata->getAttribute($key, $defaultValue);

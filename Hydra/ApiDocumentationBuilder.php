@@ -161,12 +161,7 @@ class ApiDocumentationBuilder implements ApiDocumentationBuilderInterface
                     continue;
                 }
 
-                if ($propertyItemMetadata->isReadableLink()) {
-                    $type = 'Hydra:Link';
-                } else {
-                    $type = 'rdf:Property';
-                }
-
+                $type = $propertyItemMetadata->isReadableLink() ? 'rdf:Property' : 'Hydra:Link';
                 $property = [
                     '@type' => 'hydra:SupportedProperty',
                     'hydra:property' => [
