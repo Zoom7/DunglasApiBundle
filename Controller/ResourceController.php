@@ -192,16 +192,8 @@ class ResourceController extends Controller
         if (0 === count($violations)) {
             // Validation succeed
             $this->get('event_dispatcher')->dispatch(Events::PRE_CREATE, new DataEvent($resource, $object));
-    
-            if (strpos($resource->getEntityClass(), 'User') !== false) {
-                $data['code'] = 'EMAIL_NOT_CONFIRMED';
-                return new Response(
-                    $data,
-                    201
-                );
-            } else {
-                return $this->getSuccessResponse($resource, $object, 201);
-            }
+
+            return $this->getSuccessResponse($resource, $object, 201);
             
         }
 
